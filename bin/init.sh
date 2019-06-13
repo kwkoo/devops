@@ -2,7 +2,7 @@
 
 #================== Global Variables  ==================
 
-PROJ_NAME_PREFIX='gck'
+PROJ_NAME_PREFIX='gck-'
 PROJ_TOOLS_NAME=$PROJ_NAME_PREFIX'tools'
 PROJ_DEV_NAME=$PROJ_NAME_PREFIX'dev'
 PROJ_TEST_NAME=$PROJ_NAME_PREFIX'test'
@@ -276,10 +276,10 @@ function processArguments(){
         fi
     }
 
-    PROJ_TOOLS_NAME=$PROJ_NAME_PREFIX'-tools'
-    PROJ_DEV_NAME=$PROJ_NAME_PREFIX'-dev'
-    PROJ_TEST_NAME=$PROJ_NAME_PREFIX'-test'
-    PROJ_PROD_NAME=$PROJ_NAME_PREFIX'-prod'
+    #PROJ_TOOLS_NAME=$PROJ_NAME_PREFIX'-tools'
+    #PROJ_DEV_NAME=$PROJ_NAME_PREFIX'-dev'
+    #PROJ_TEST_NAME=$PROJ_NAME_PREFIX'-test'
+    #PROJ_PROD_NAME=$PROJ_NAME_PREFIX'-prod'
 
 
     if [ "$DELETE_ALL_PROJECT" = "true" ]; then
