@@ -198,7 +198,7 @@ if [ "$GOGS_ROUTE_NAME" != "" ]; then
         echo
         echo "---> Creating repository ..."
         echo
-        curl -H "Content-Type: application/json" -d '{"name": "nationalparks, "description": "National Parks Source Codes", "private": false}' -X POST http://${GOGSUSER}:${GOGSPASSWORD}@${GOGS_HOSTNAME}/api/v1/user/repos?token=8a4fc41b4868aecdd623b10cb1b64a36c6ee51f3
+        curl -H "Content-Type: application/json" -d '{"name": "nationalparks", "description": "National Parks Source Codes", "private": false}' -X POST http://${GOGSUSER}:${GOGSPASSWORD}@${GOGS_HOSTNAME}/api/v1/user/repos?token=8a4fc41b4868aecdd623b10cb1b64a36c6ee51f3
         echo
         echo
         echo "---> Push bare codes as mirror to gogs ..."
@@ -217,9 +217,9 @@ if [ "$GOGS_ROUTE_NAME" != "" ]; then
         echo "---> Push bare codes as mirror to gogs ..."
         git add .
         git commit -m "Updated Jenkinsfile"
-        git push http://${GOGSUSER}:${GOGSPASSWORD}@${GOGS_HOSTNAME}/${GOGSUSER}/travel-insurance-rules.git 
+        git push http://${GOGSUSER}:${GOGSPASSWORD}@${GOGS_HOSTNAME}/${GOGSUSER}/nationalparks.git 
         cd ..
-        rm -rf travel-insurance-rules
+        rm -rf nationalparks
     else
         echo
         echo "---> Gogs hostname is not valid... hostname: ${GOGS_HOSTNAME}"
@@ -250,7 +250,7 @@ sed -i -e "s/https:\/\/github.com\/chengkuangan\/nationalparks.git/http:\/\/gogs
 echo
 echo "---> Create Jenkins job definition ..."
 echo
-java -jar /tmp/jenkins-cli.jar -s https://jenkins-${PROJECTNAME}.${DOMAIN_NAME}/ -noCertificateCheck -auth ${JENKINS_USERNAME}:${JENKINS_TOKEN}  create-job travel-insurance-rules < /tmp/jenkins-job-work.xml
+java -jar /tmp/jenkins-cli.jar -s https://jenkins-${PROJECTNAME}.${DOMAIN_NAME}/ -noCertificateCheck -auth ${JENKINS_USERNAME}:${JENKINS_TOKEN}  create-job nationalparks < /tmp/jenkins-job-work.xml
 
 #================== Other Settings ==================
 
