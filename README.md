@@ -24,11 +24,22 @@ when you demo the Jenkins builds.
 
 
 ## To Do
+To be updated.
 
 ## Screen Shots
 ### Projects
 ![Projects](https://github.com/chengkuangan/devops/blob/master/docs/images/projects.png?raw=true)
 ### CI/CD Tools
 ![CI/CD Tools](https://github.com/chengkuangan/devops/blob/master/docs/images/cicdtools.png?raw=true)
-### Gogs with nationalparks sample source codes
+### Gogs with nationalparks Sample Source Codes
 ![Gogs](https://github.com/chengkuangan/devops/blob/master/docs/images/gogs-nationalparks.png?raw=true)
+### Gogs Git Hooks Settings
+![Gogs Settings](https://github.com/chengkuangan/devops/blob/master/docs/images/gogs-nationalparks-settings.png?raw=true)
+### Nexus3 Repositories
+![Nexus Repo](https://github.com/chengkuangan/devops/blob/master/docs/images/nexus3-repo.png?raw=true)
+### Jenkins Console
+![Jenkins Console](https://github.com/chengkuangan/devops/blob/master/docs/images/jenkins-console.png?raw=true)
+### Jenkins Settings
+![Jenkins Settings](https://github.com/chengkuangan/devops/blob/master/docs/images/jenkins-settings.png?raw=true)
+### Jenkins User Token
+![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/jenkins-user-token.png?raw=true)
