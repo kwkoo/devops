@@ -56,8 +56,16 @@ function printImportantNoteBeforeExecute(){
 
 function printAdditionalRemarks(){
     echo
-    #echo "================================ Additional Manual Steps Required ================================"
-    #echo
+    echo "================================ Additional Manual Steps Required ================================"
+    echo
+    echo "Configure Git Hooks."
+    echo "1. Please login into gogs and navigate into the nationalparks repository."
+    echo "2. Click on Settings -> Git Hooks -> post-receive."
+    echo "3. Enter the following script. Make sure you enter the correct "
+    echo "   jenkins user name, token and the correct hostname for Jenkins server. "
+    echo "   jenkins username is a format something like this demouser-admin-view-edit"
+    echo "   curl -k -X POST --user <jenkinuser>:<token> https://jenkins.apps.ocp.com/job/nationalparks/build"
+    echo
 }
 
 function printVariables(){
@@ -258,7 +266,7 @@ echo
 echo "---> Create Jenkins job definition ..."
 echo
 java -jar /tmp/jenkins-cli.jar -s https://jenkins-${PROJECTNAME}.${DOMAIN_NAME}/ -noCertificateCheck -auth ${JENKINS_USERNAME}:${JENKINS_TOKEN}  create-job nationalparks < /tmp/jenkins-job-work.xml
-
+echo
 
 #================== Configure Red Hat Repo in Nexus ==================
 # ---- temporary fix. The orinal approach using post create seems does not work anymore.
