@@ -30,7 +30,7 @@ function printCmdUsage(){
     echo "-n                  Required. Project name where the gogs and jenkins container located"
     echo "-gu                 Required. Gogs username to initialize the repository for the demo. "
     echo "-gu                 Required. Gogs password. "
-    echo "-ju                 Required. Jenkins username."
+    echo "-ju                 Required. Jenkins username. This is in a format something like this: demouser-admin-view-edit"
     echo "-jt                 Required. Jenkins token."
     echo "-d                  Required. The OCP domain name. e.g. apps.ocp.demo.com" 
     echo "-np                 Optional. Default: $PROJECT_PREFIX. Project prefix. Required to update variable value in Jenkinsfile."

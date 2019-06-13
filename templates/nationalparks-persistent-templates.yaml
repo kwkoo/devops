@@ -242,9 +242,6 @@ objects:
       type: Binary
     strategy:
       sourceStrategy:
-        env:
-        - name: MAVEN_MIRROR_URL
-          value: ${MAVEN_MIRROR_URL}
         from:
           kind: ImageStreamTag
           name: redhat-openjdk18-openshift:1.2
@@ -306,11 +303,6 @@ parameters:
   displayName: Mongodb Volume Capacity
   name: MONGODB_VOLUME_CAPACITY
   value: 5Gi
-  required: true
-- description: Maven Mirror URL
-  displayName: Maven Mirror URL
-  name: MAVEN_MIRROR_URL
-  value: http://nexus3.pm-tools.svc:8081/repository/maven-all-public
   required: true
 - description: Image Name
   displayName: Image Name

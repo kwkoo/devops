@@ -319,7 +319,7 @@ if [ "$CREATE_NATIONALPARKS" = "true" ]; then
     echo
     echo "------> Provisioning nationalparks now..."
     echo
-    oc new-app -n $PROJ_DEV_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-persistent-templates.yaml -p IMAGE_NAME=DevelopmentReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p MAVEN_MIRROR_URL=http://$NEXUS_SERVICE_NAME:8081/repository/maven-all-public -p APPLICATION_NAME=$NATIONALPARKS_APPLICATION_NAME
+    oc new-app -n $PROJ_DEV_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-persistent-templates.yaml -p IMAGE_NAME=DevelopmentReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$NATIONALPARKS_APPLICATION_NAME
     # label nationalparks as parksmap backend
     oc label service $NATIONALPARKS_APPLICATION_NAME type=parksmap-backend -n $PROJ_DEV_NAME
 fi
@@ -330,7 +330,7 @@ if [ "$CREATE_PARKSMAP" = "true" ]; then
     echo
     echo "------> Provisioning parkmaps-web now..."
     echo
-    oc new-app -n $PROJ_DEV_NAME --allow-missing-imagestream-tags=true -f ../templates/parksmap-web-dev-templates.yaml -p IMAGE_NAME=DevelopmentReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p MAVEN_MIRROR_URL=http://$NEXUS_SERVICE_NAME:8081/repository/maven-all-public -p APPLICATION_NAME=$PARKSMAP_APPLICATION_NAME
+    oc new-app -n $PROJ_DEV_NAME --allow-missing-imagestream-tags=true -f ../templates/parksmap-web-dev-templates.yaml -p IMAGE_NAME=DevelopmentReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PARKSMAP_APPLICATION_NAME
 fi
 
 #================== Prepares Test Environment ==================
