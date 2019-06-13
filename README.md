@@ -50,7 +50,7 @@ To be updated.
 ![Jenkins Builds](https://github.com/chengkuangan/devops/blob/master/docs/images/jenkins-build.png?raw=true)
 ### nationalparks Image Build at Dev Environment
 ![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/imagebuild-dev.png?raw=true)
-### Green Apps is Serving Request
-![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/green-apps.png?raw=true)
 ### Blue Apps is Serving Request
+![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/green-apps.png?raw=true)
+### Green Apps is Serving Request
 ![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/blue-apps.png?raw=true)
