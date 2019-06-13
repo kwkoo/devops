@@ -16,6 +16,7 @@ LOGOUT_WHEN_DONE="false"
 DOMAIN_NAME=""
 JENKINS_USERNAME=""
 JENKINS_TOKEN=""
+PROJECT_PREFIX="gck-"
 
 #================== Functions ==================
 
@@ -32,6 +33,7 @@ function printCmdUsage(){
     echo "-ju                 Required. Jenkins username."
     echo "-jt                 Required. Jenkins token."
     echo "-d                  Required. The OCP domain name. e.g. apps.ocp.demo.com" 
+    echo "-np                 Optional. Default: $PROJECT_PREFIX. Project prefix. Required to update variable value in Jenkinsfile."
     echo "-logout             Optional. Default: $LOGOUT_WHEN_DONE. Set to true to logout oc connection after the completion."
     echo
 }
@@ -70,6 +72,7 @@ function printVariables(){
     echo "Jenkins username: $JENKINS_USERNAME"
     echo "Jenkins token: $JENKINS_TOKEN"
     echo "OCP Domain Name: $DOMAIN_NAME"
+    echo "Project prefix: $PROJECT_PREFIX"
     echo "Logout oc after completion: $LOGOUT_WHEN_DONE"
     echo
 }
@@ -114,7 +117,10 @@ function processArguments(){
         JENKINS_TOKEN="$1"  
       elif [ "$1" == "-d" ]; then
         shift
-        DOMAIN_NAME="$1"      
+        DOMAIN_NAME="$1"    
+      elif [ "$1" == "-np" ]; then
+        shift
+        PROJECT_PREFIX="$1"    
       else
         echo "Unknown argument: $1"
         printCmdUsage
@@ -212,7 +218,7 @@ if [ "$GOGS_ROUTE_NAME" != "" ]; then
         echo
         git clone http://${GOGS_HOSTNAME}/${GOGSUSER}/nationalparks.git 
         cd nationalparks
-        sed -i -e 's/def projectNamePrefix = ""/def projectNamePrefix = "gck-"/g' ./Jenkinsfile
+        sed -i -e "s/def projectNamePrefix = \"\"/def projectNamePrefix = \"${PROJECT_PREFIX}\"/g" ./Jenkinsfile
         sed -i -e "s/def wildcardDNS = \".ocp.demo.com\"/def wildcardDNS = \".${DOMAIN_NAME}\"/g" ./Jenkinsfile
         echo "---> Push bare codes as mirror to gogs ..."
         git add .
