@@ -259,6 +259,44 @@ echo "---> Create Jenkins job definition ..."
 echo
 java -jar /tmp/jenkins-cli.jar -s https://jenkins-${PROJECTNAME}.${DOMAIN_NAME}/ -noCertificateCheck -auth ${JENKINS_USERNAME}:${JENKINS_TOKEN}  create-job nationalparks < /tmp/jenkins-job-work.xml
 
+
+#================== Configure Red Hat Repo in Nexus ==================
+# ---- temporary fix. The orinal approach using post create seems does not work anymore.
+
+echo "---> Checking if the Nexus POD is ready ..."
+echo
+NEXUS_POD_NAME="$(oc get pods --no-headers -o custom-columns=NAME:.metadata.name -n $PROJECTNAME | grep nexus3 )"
+while [ "$NEXUS_POD_READY" = "false" ]
+do
+   sleep 5
+   NEXUS_POD_READY="$(oc get pod ${NEXUS_POD_NAME} -o custom-columns=Ready:status.containerStatuses[0].ready --no-headers -n $PROJECTNAME)"
+   echo "POD: $NEXUS_POD_NAME, ready: $NEXUS_POD_READY ..."
+done
+echo
+NEXUS_ROUTE_NAME="$(oc get routes --no-headers  -o custom-columns=Name:metadata.name -n $PROJECTNAME | grep nexus3)"
+if [ "$NEXUS_ROUTE_NAME" != "" ]; then
+    NEXUS_HOSTNAME="$(oc get route ${NEXUS_ROUTE_NAME} --no-headers  -o custom-columns=domain:spec.host  -n $PROJECTNAME)"
+    echo
+    echo "---> Nexus Hostname: ${NEXUS_HOSTNAME}"
+    echo
+    if [ "$NEXUS_HOSTNAME" != "" ]; then
+        echo
+        echo "---> Creating Red Hat Repo in Nexus ..."
+        echo
+        curl -o /tmp/nexus-functions -s https://raw.githubusercontent.com/chengkuangan/scripts/master/configure_nexus3_repo.sh; source /tmp/nexus-functions admin admin123 http://${NEXUS_HOSTNAME}
+        echo
+    else
+        echo
+        echo "---> Nexus hostname is not valid... hostname: ${NEXUS_HOSTNAME}"
+        echo
+    fi 
+else
+    echo
+    echo "---> Nexus route name is not valid... name: ${NEXUS_ROUTE_NAME}"
+    echo
+fi
+echo
+
 #================== Other Settings ==================
 
 if [ "$LOGOUT_WHEN_DONE" = "true" ]; then
