@@ -87,9 +87,6 @@ objects:
       type: Binary
     strategy:
       sourceStrategy:
-        env:
-        - name: MAVEN_MIRROR_URL
-          value: ${MAVEN_MIRROR_URL}
         from:
           kind: ImageStreamTag
           name: redhat-openjdk18-openshift:1.2
@@ -121,11 +118,6 @@ parameters:
   displayName: Image Version
   name: IMAGE_VERSION
   value: "1.0.0"
-  required: true
-- description: Maven Mirror URL
-  displayName: Maven Mirror URL
-  name: MAVEN_MIRROR_URL
-  value: http://nexus3-tools.ocp.demo.com/repository/maven-all-public
   required: true
 - description: Image Name
   displayName: Image Name

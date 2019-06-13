@@ -73,6 +73,11 @@ objects:
               configMapKeyRef:
                 key: mongodb.database
                 name: ${APPLICATION_NAME}
+          - name: PROD_ENV_VERSION
+            valueFrom:
+              configMapKeyRef:
+                key: prod.env.version
+                name: ${PROD_ENV_VERSION}      
           image: ${IMAGE_PROJECT_NAME}/${APPLICATION_NAME}:${IMAGE_NAME}-${IMAGE_VERSION}
           imagePullPolicy: IfNotPresent
           name: ${APPLICATION_NAME}
@@ -123,4 +128,8 @@ parameters:
   displayName: Generic Application Label
   name: APP_LABEL
   value: nationalparks
+  required: true
+- description: A label description to label the whether this is Green or Blue container.
+  displayName: Blue-Green Label
+  name: PROD_ENV_VERSION
   required: true

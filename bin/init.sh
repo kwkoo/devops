@@ -7,7 +7,7 @@ PROJ_TOOLS_NAME='tools'
 PROJ_DEV_NAME='dev'
 PROJ_TEST_NAME='test'
 PROJ_PROD_NAME='prod'
-OCP_WILDCARD_DNSNAME=.apps.na1.openshift.opentlc.com
+DOMAIN_NAME=apps.na1.openshift.opentlc.com
 NEXUS_SERVICE_NAME=nexus3
 NATIONALPARKS_APPLICATION_NAME=nationalparks
 PARKSMAP_APPLICATION_NAME=parksmap-web
@@ -16,16 +16,13 @@ MASTER_NODE_URL=""
 USERNAME=""
 PASSWORD=""
 DEMO_SCOPE="nmp"
-DELETE_ALL_PROJECT="true"
-DELETE_RELATED_PROJECT="false"
-CONFIRM_DELETE_PROJECT="Yes"
 CREATE_TOOLS="false"
 CREATE_NATIONALPARKS="false"
 CREATE_PARKSMAP="false"
 CREATE_MLBPARKS="false"
 LOGOUT_WHEN_DONE="false"
-
 UNINSTALL="false"
+CONFIRM_UNINSTALL=""
 
 #================== Functions ==================
 
@@ -43,15 +40,10 @@ function printCmdUsage(){
     echo "                           n - Create demo with nationaparks."
     echo "                           p - Create demo with parksmap-web."
     echo "                           m - Create demo with mlbparks."
-#    echo "       np - Create demo with both nationalparks and parksmap-web."
-#    echo "       mp - Create demo with both mlbparks and parksmap-web."
-#    echo "       nmp - Default. Create demo with nationalparks, mlbparks and parksmap-web"
-    echo "--delete-all-project       Optional. Default: $DELETE_ALL_PROJECT. Specify --delete-all-project true will delete all existing projects with the same project name."
-    echo "--delete-related-project   Optional. Default: $DELETE_RELATED_PROJECT. Setting this to true will superceded --delete-all-project"
-    echo "--project-name-prefix      Optional. Default: $PROJ_NAME_PREFIX. Specify a prefix to avoid project name conflict in shared environment."
-    echo "-logout                    Logout from Openshift when the command is completed. Default is true, specify false to ignore logout."
-    echo "--wildcard-dnsname         A default wildcard DNS Name used to suffix the exposed routes DNS Name. Defauted to $OCP_WILDCARD_DNSNAME"
-    echo "-uninstall                  Optional. Default: $UNINSTALL. True or false. Uninstall the demo."
+    echo "-np                        Optional. Default: $PROJ_NAME_PREFIX. Specify a project name prefix to avoid project name conflict in shared environment."
+    echo "-logout                    Optional. Default: $LOGOUT_WHEN_DONE. Logout from Openshift when the command is completed."
+    echo "-d                         Optional. Defaut: $DOMAIN_NAME. A default ocp domain Name."
+    echo "-uninstall                 Optional. Default: $UNINSTALL. True or false. Uninstall the demo."
     echo
 }
 
@@ -84,6 +76,7 @@ function printUsage(){
 function printImportantNoteBeforeExecute(){
     echo
     echo "Please ensure the following pre-requisition are met before proceeding..."
+    echo
     echo "1. Please ensure sufficient PV is available for the PODs required PVs."
     echo
 }
@@ -104,77 +97,6 @@ function printAdditionalRemarks(){
     echo 
     echo "Configure and loading demo data into the demo environment."
     echo "1. Run the provided initDemoData.sh to configure Gogs and Jenkins with the username and token created in the previous steps."
-
-
-    
-
-
-    echo
-    echo "================================ Additional Manual Steps Required ================================"
-    echo
-    echo "Some of the steps cannot be automated or too troublesome to be automated using this script, thus manual "
-    echo "manual steps needed to be peform in order to complete the demo setup. Please follow the steps below: "
-    echo
-    echo "1. Repository need to be created in gogs POD for parksmap-web, nationalparks and mlbparks. Once these "
-    echo "   are created, please run the initGog.sh command to download the sample source codes and push them to "
-    echo "   these repository in OCP's gogs containers. Only do this when the gogs POP is properly provisioned and "
-    echo "   actively available."
-    echo
-    echo "2. To enable git hook, please refers to following guide:"
-    echo "   ../notes/githook-config.txt"
-    echo
-    echo "For Information Only:"
-    echo
-    echo "The following changes were made to any original source taken from 3rd party in order to make this demo works."
-    echo "This section is for information only, no addiional steps need to be taken."
-    echo
-    echo "1. SNAPSHOOT/RELEASE version tags is removed from pom.xml as per the following and move the section to the top"
-    echo "of the pom.xml for nationalparks, mlbparks and parksmap-web projects."
-    echo
-    echo -e "<groupId>com.openshift.evg.roadshow</groupId>"
-    echo -e "<artifactId>parksmap-web</artifactId>"
-    echo -e "<version>1.0.0</version>"
-    echo -e "<packaging>jar</packaging>"
-    echo
-    echo "2. For sonarqube usage, the following plugins is added into the pom.xml in order to allow mvn compilation to "
-    echo "   completed successfully."
-    echo
-    echo -e "<plugin>"
-    echo -e "  <groupId>org.sonarsource.scanner.maven</groupId>"
-    echo -e "  <artifactId>sonar-maven-plugin</artifactId>"
-    echo -e "  <version>3.0.1</version>"
-    echo -e "</plugin>"
-    echo -e "<plugin>"
-    echo -e "  <groupId>org.jacoco</groupId>"
-    echo -e "  <artifactId>jacoco-maven-plugin</artifactId>"
-    echo -e "  <version>0.7.6.201602180812</version>"
-    echo -e "  <executions>"
-    echo -e "    <execution>"
-    echo -e "      <id>default-prepare-agent</id>"
-    echo -e "      <goals>"
-    echo -e "        <goal>prepare-agent</goal>"
-    echo -e "      </goals>"
-    echo -e "    </execution>"
-    echo -e "    <execution>"
-    echo -e "      <id>default-report</id>"
-    echo -e "      <phase>prepare-package</phase>"
-    echo -e "      <goals>"
-    echo -e "        <goal>report</goal>"
-    echo -e "      </goals>"
-    echo -e "    </execution>"
-    echo -e "  </executions>"
-    echo -e "</plugin>"
-    echo
-    echo "3. Remember to change the nexus URL/hostname if it is different from what has been configured in the following "
-    echo "   files in the repositories: "
-    echo "   - nexus_settings.xml"
-    echo "   - nexus_openshift_settings.xml"
-    echo
-    echo "4. Double check that the hostname for all the services are correct in the Jenkinsfile based on your environment."
-    echo
-    echo "5. Make sure Sonarqube is properly configured and loaded, something due to internet connection and limited server"
-    echo "   resources, the Sonarqube is created without proper default rules and quality profiles, this will cause the "
-    echo "   Jenkins Pipelines failed."
     echo
 }
 
@@ -187,7 +109,7 @@ function printVariables(){
     echo "PROJ_DEV_NAME = $PROJ_DEV_NAME"
     echo "PROJ_TEST_NAME = $PROJ_TEST_NAME"
     echo "PROJ_PROD_NAME = $PROJ_PROD_NAME"
-    echo "OCP_WILDCARD_DNSNAME = $OCP_WILDCARD_DNSNAME"
+    echo "DOMAIN_NAME = $DOMAIN_NAME"
     echo "NEXUS_SERVICE_NAME = $NEXUS_SERVICE_NAME"
     echo "NATIONALPARKS_APPLICATION_NAME = $NATIONALPARKS_APPLICATION_NAME"
     echo "PARKSMAP_APPLICATION_NAME = $PARKSMAP_APPLICATION_NAME"
@@ -199,7 +121,6 @@ function printVariables(){
     echo "CREATE_NATIONALPARKS = $CREATE_NATIONALPARKS"
     echo "CREATE_PARKSMAP = $CREATE_PARKSMAP"
     echo "CREATE_MLBPARKS = $CREATE_MLBPARKS"
-    echo "DELETE_ALL_PROJECT = $DELETE_ALL_PROJECT"
     echo
 }
 
@@ -226,21 +147,15 @@ function processArguments(){
       elif [ "$1" == "-s" ]; then
         shift
         DEMO_SCOPE="$1"
-      elif [ "$1" == "--delete-all-project" ]; then
-        shift
-        DELETE_ALL_PROJECT="$1"
-      elif [ "$1" == "--delete-related-project" ]; then
-        shift
-        DELETE_RELATED_PROJECT="$1"
-      elif [ "$1" == "--project-name-prefix" ]; then
+      elif [ "$1" == "-np" ]; then
         shift
         PROJ_NAME_PREFIX="$1"
       elif [ "$1" == "-logout" ]; then
         shift
         LOGOUT_WHEN_DONE="$1"
-      elif [ "$1" == "--wildcard-dnsname" ]; then
+      elif [ "$1" == "-d" ]; then
         shift
-        OCP_WILDCARD_DNSNAME="$1"
+        DOMAIN_NAME="$1"
       else
         echo "Unknown argument: $1"
         printCmdUsage
@@ -282,13 +197,13 @@ function processArguments(){
     PROJ_PROD_NAME=$PROJ_NAME_PREFIX'prod'
 
 
-    if [ "$DELETE_ALL_PROJECT" = "true" ]; then
-        echo -e "Confirm to delete all existing projects related to this demo (Yes/No) ?"
-        read CONFIRM_DELETE_PROJECT
+    if [ "$UNINSTALL" = "true" ]; then
+        echo -e "Confirm Uninstall the demo environment? (Yes/No)"
+        read CONFIRM_UNINSTALL
     fi
 
-    if [[ "$CONFIRM_DELETE_PROJECT" == "No" ]] || [[ "$CONFIRM_DELETE_PROJECT" == "no" ]]; then
-        echo "Ok, no going to delete the projects...abort command..."
+    if [[ "$CONFIRM_UNINSTALL" == "No" ]] || [[ "$CONFIRM_UNINSTALL" == "no" ]]; then
+        echo "Ok, no going to uninstall the demo...abort command..."
         exit 0
     fi
 
@@ -312,31 +227,16 @@ oc login -u $USERNAME -p $PASSWORD $MASTER_NODE_URL
 #================== Delete Projects if Found ==================
 # Does not care whether project exists or not, just call, if not found, ignore the error.
 
-if [ "$DELETE_ALL_PROJECT" = "true" ]; then
-    if [ "$DELETE_RELATED_PROJECT" = "true" ]; then
-        echo
-        echo "---> Deleting related existing projects if exists..."
-        echo
-        if [ "$CREATE_TOOLS" = "true" ]; then
-            oc delete project $PROJ_TOOLS_NAME
-        fi
-        if [[ "$CREATE_NATIONALPARKS" = "true" ]] || [[ "$CREATE_MLBPARKS" = "true" ]] || [[ "$CREATE_PARKSMAP" = "true" ]] ; then
-            oc delete project $PROJ_DEV_NAME
-            oc delete project $PROJ_TEST_NAME
-            oc delete project $PROJ_PROD_NAME
-        fi
-    else
-        echo
-        echo "---> Deleting existing projects if exists..."
-        echo
-        oc delete project $PROJ_TOOLS_NAME
-        oc delete project $PROJ_DEV_NAME
-        oc delete project $PROJ_TEST_NAME
-        oc delete project $PROJ_PROD_NAME
-    fi
-
-    echo "Wait for 60 seconds to allow the projects to be deleted completely..."
-    sleep 60
+if [ "$UNINSTALL" = "true" ]; then
+    echo
+    echo "---> Deleting existing projects if exists..."
+    echo
+    oc delete project $PROJ_TOOLS_NAME
+    oc delete project $PROJ_DEV_NAME
+    oc delete project $PROJ_TEST_NAME
+    oc delete project $PROJ_PROD_NAME
+    echo "---> Projects deleted..."
+    exit 0
 fi
 
 #================== Create projects required with neccessary permissions ==================
@@ -474,12 +374,9 @@ if [ "$CREATE_NATIONALPARKS" = "true" ]; then
     PROD_NATIONALPARKS_SERVER_GREEN=nationalparks-green
     PROD_NATIONALPARKS_SERVER_BLUE=nationalparks-blue
 
-    oc new-app -n $PROJ_PROD_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PROD_NATIONALPARKS_SERVER_GREEN
-    oc new-app -n $PROJ_PROD_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PROD_NATIONALPARKS_SERVER_BLUE
+    oc new-app -n $PROJ_PROD_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PROD_NATIONALPARKS_SERVER_GREEN -p PROD_ENV_VERSION="Green"
+    oc new-app -n $PROJ_PROD_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PROD_NATIONALPARKS_SERVER_BLUE -p PROD_ENV_VERSION="Blue"
     oc new-app -n $PROJ_PROD_NAME -f ../templates/nationalparks-mongodb-prod-templates.yaml
-
-    oc env dc/$PROD_NATIONALPARKS_SERVER_GREEN PROD_ENV_VERSION="Green Server" -n $PROJ_PROD_NAME
-    oc env dc/$PROD_NATIONALPARKS_SERVER_BLUE PROD_ENV_VERSION="Blue Server" -n $PROJ_PROD_NAME
 
     oc patch dc $PROD_NATIONALPARKS_SERVER_GREEN --patch "{\"spec\": { \"triggers\": []}}" -n $PROJ_PROD_NAME
     oc patch dc $PROD_NATIONALPARKS_SERVER_BLUE --patch "{\"spec\": { \"triggers\": []}}" -n $PROJ_PROD_NAME
