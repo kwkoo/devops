@@ -247,6 +247,7 @@ echo
 echo "---> Update the jenkins template file with the actual demo environment settings ..."
 echo
 sed -i -e "s/https:\/\/github.com\/chengkuangan\/nationalparks.git/http:\/\/gogs:3000\/${GOGSUSER}\/nationalparks.git/g" /tmp/jenkins-job-work.xml
+sed -i -e "s/<name>demo1</name>/<name>${GOGSUSER}</name>/g" /tmp/jenkins-job-work.xml
 echo
 echo "---> Create Jenkins job definition ..."
 echo
