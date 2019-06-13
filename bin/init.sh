@@ -3,10 +3,10 @@
 #================== Global Variables  ==================
 
 PROJ_NAME_PREFIX='gck-'
-PROJ_TOOLS_NAME=$PROJ_NAME_PREFIX'tools'
-PROJ_DEV_NAME=$PROJ_NAME_PREFIX'dev'
-PROJ_TEST_NAME=$PROJ_NAME_PREFIX'test'
-PROJ_PROD_NAME=$PROJ_NAME_PREFIX'prod'
+PROJ_TOOLS_NAME='tools'
+PROJ_DEV_NAME='dev'
+PROJ_TEST_NAME='test'
+PROJ_PROD_NAME='prod'
 OCP_WILDCARD_DNSNAME=.apps.na1.openshift.opentlc.com
 NEXUS_SERVICE_NAME=nexus3
 NATIONALPARKS_APPLICATION_NAME=nationalparks
@@ -276,10 +276,10 @@ function processArguments(){
         fi
     }
 
-    #PROJ_TOOLS_NAME=$PROJ_NAME_PREFIX'-tools'
-    #PROJ_DEV_NAME=$PROJ_NAME_PREFIX'-dev'
-    #PROJ_TEST_NAME=$PROJ_NAME_PREFIX'-test'
-    #PROJ_PROD_NAME=$PROJ_NAME_PREFIX'-prod'
+    PROJ_TOOLS_NAME=$PROJ_NAME_PREFIX'tools'
+    PROJ_DEV_NAME=$PROJ_NAME_PREFIX'dev'
+    PROJ_TEST_NAME=$PROJ_NAME_PREFIX'test'
+    PROJ_PROD_NAME=$PROJ_NAME_PREFIX'prod'
 
 
     if [ "$DELETE_ALL_PROJECT" = "true" ]; then
