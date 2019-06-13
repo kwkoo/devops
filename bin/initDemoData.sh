@@ -205,7 +205,7 @@ if [ "$GOGS_ROUTE_NAME" != "" ]; then
         echo
         git push --mirror http://${GOGSUSER}:${GOGSPASSWORD}@${GOGS_HOSTNAME}/${GOGSUSER}/nationalparks.git 
         cd ..
-        rm -rf ../nationalparks.git
+        rm -rf nationalparks.git
         echo
         echo
         echo "---> Clone the git to modify the Jenkinsfile ..."
