@@ -13,11 +13,11 @@ Run the ./initDemoData.sh script to initilize the required demo data.
 There are some manual steps required before running the initDemoData.sh script. Please run ./initDemoData.sh -h for more details.
 
 ## Notes
-1. You may want to increase the resource limits for Jenkins and Nexus. Especially Nexus will need minimum 2GB RAM to run
+1. You may want to increase the resource limits for Jenkins and Nexus. Especially Nexus will need minimum 3GB RAM to run
 properly. These resource limits can be changed from the init.sh script using parameters before provisioning. 
 Allocation of 4GB will be the best for smooth demo experience. With lower memory allocation, Jenkins build will always fail caused by 
-Nexus keep restarting in the background. Higher memory ensure maven/build are cached once the first built has been, which helps to cut down
-a lot of build time for all the subsequence builds. If you restaretd the POD or server, make sure you have done a first build before the actual
+Nexus keep restarting in the background. Higher memory ensure maven/build are cached once the first built has been done, which helps to cut down
+a lot of build time for all the subsequence builds. If you restarted the POD or server, make sure you have done a first build before the actual
 demo.
 2. Do a chmod +x init.sh if the script is without execution permission.
 3. Do a chmod +x initDemoData.sh if the script is without execution permission.
@@ -43,3 +43,11 @@ To be updated.
 ![Jenkins Settings](https://github.com/chengkuangan/devops/blob/master/docs/images/jenkins-settings.png?raw=true)
 ### Jenkins User Token
 ![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/jenkins-user-token.png?raw=true)
+### Jenkins Builds
+![Jenkins Builds](https://github.com/chengkuangan/devops/blob/master/docs/images/jenkins-build.png?raw=true)
+### nationalparks Image Build at Dev Environment
+![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/imagebuild-dev.png?raw=true)
+### Green Apps is Serving Request
+![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/green-apps.png?raw=true)
+### Blue Apps is Serving Request
+![Jenkins User Token](https://github.com/chengkuangan/devops/blob/master/docs/images/blue-apps.png?raw=true)

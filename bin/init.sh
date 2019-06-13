@@ -50,7 +50,7 @@ function printCmdUsage(){
 function printUsage(){
     echo
     echo "This command initialize a CI/CD demo in OpenShift based on Parskmap demo codes."
-    echo "It has been tested in OpenShift 3.5"
+    echo "It has been tested working in OpenShift 3.x and 4.x"
     echo
     echo "The following PODs will be provisioned and configured based on the arguments specified:"
     echo
@@ -62,9 +62,9 @@ function printUsage(){
     echo
     echo -e "PODs in Development, Test and Production Environment Projects"
     echo -e "\t- nationalparks"
-    echo -e "\t- parksmap-web"
-    echo -e "\t- mlbparks"
-    echo -e "Production Environment will simulate blue/green deployment."
+    echo
+    echo -e "Production Environment will simulate a simple blue/green deployment. Not bullet proof and but showcase the posibility of how blue/green"
+    echo -e "deployment can be done in  OCP. There are many approaches to do this."
     printCmdUsage
     echo
     printAdditionalRemarks
@@ -82,8 +82,9 @@ function printImportantNoteBeforeExecute(){
 }
 
 function printAdditionalRemarks(){
-
+    echo -e "\e[0;31 RED"
     echo "================================ Post-Deployment Steps ================================"
+    echo -e "\e[0m"
     echo "Please perform the following steps to complete the demo setup:"
     echo
     echo "Gogs Sample Source Codes"

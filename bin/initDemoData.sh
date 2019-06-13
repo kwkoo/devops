@@ -63,7 +63,7 @@ function printAdditionalRemarks(){
     echo "2. Click on Settings -> Git Hooks -> post-receive."
     echo "3. Enter the following script. Make sure you enter the correct "
     echo "   jenkins user name, token and the correct hostname for Jenkins server. "
-    echo "   jenkins username is a format something like this demouser-admin-view-edit"
+    echo "   jenkins username is a format something like this demouser-admin-edit-view"
     echo "   curl -k -X POST --user <jenkinuser>:<token> https://jenkins.apps.ocp.com/job/nationalparks/build"
     echo
 }
