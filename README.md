@@ -27,7 +27,7 @@ demo.
 To be updated.
 
 ## Video
-Coming...
+[Demo Video](https://www.dropbox.com/s/31bzz7ccrb9o0hz/OCP%20CICD%20Demo%202.mp4?dl=0)
 
 ## Screen Shots
 ### Projects
