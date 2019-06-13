@@ -374,8 +374,8 @@ if [ "$CREATE_NATIONALPARKS" = "true" ]; then
     PROD_NATIONALPARKS_SERVER_GREEN=nationalparks-green
     PROD_NATIONALPARKS_SERVER_BLUE=nationalparks-blue
 
-    oc new-app -n $PROJ_PROD_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PROD_NATIONALPARKS_SERVER_GREEN -p PROD_ENV_VERSION=Green
-    oc new-app -n $PROJ_PROD_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PROD_NATIONALPARKS_SERVER_BLUE -p PROD_ENV_VERSION=Blue
+    oc new-app -n $PROJ_PROD_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PROD_NATIONALPARKS_SERVER_GREEN -p PROD_ENV_VERSION="Green"
+    oc new-app -n $PROJ_PROD_NAME --allow-missing-imagestream-tags=true -f ../templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$PROJ_DEV_NAME -p APPLICATION_NAME=$PROD_NATIONALPARKS_SERVER_BLUE -p PROD_ENV_VERSION="Blue"
     oc new-app -n $PROJ_PROD_NAME -f ../templates/nationalparks-mongodb-prod-templates.yaml
 
     oc patch dc $PROD_NATIONALPARKS_SERVER_GREEN --patch "{\"spec\": { \"triggers\": []}}" -n $PROJ_PROD_NAME
