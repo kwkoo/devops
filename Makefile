@@ -42,8 +42,11 @@ PARKSMAP_APPLICATION_NAME=parksmap-web
 
 LOGOUT_WHEN_DONE=0
 
+# If you use something other than gogs / gogs, you will need to create the
+# user manually in gogs.
 GOGSUSER=gogs
 GOGSPASSWORD=gogs
+
 JENKINS_USERNAME=jenkins
 JENKINS_TOKEN=jenkins
 
@@ -90,7 +93,7 @@ DOMAIN_NAME=apps.sing-f1a3.openshiftworkshop.com
 .PHONY: deployall clean deploytemplates printvariables login clean createprojects provisionroles deploygogs deploynexus deployjenkins preparedev preparetest prepareprod waitforgogspod clonenationalparks waitforjenkins createjenkinsjob waitfornexus configurenexus
 
 
-deployall: printvariables deploytemplates login createprojects provisionroles deploygogs deploynexus deployjenkins preparedev preparetest prepareprod waitforgogspod clonenationalparks waitforjenkins createjenkinsjob waitfornexus configurenexus
+deployall: printvariables deploytemplates login createprojects provisionroles deploygogs deploynexus deployjenkins createjenkinsjob preparedev preparetest prepareprod waitforgogspod clonenationalparks waitfornexus configurenexus
 	@echo "Done"
 
 clean:
@@ -149,7 +152,8 @@ printvariables:
 	@echo "JENKINS_TOKEN = $(JENKINS_TOKEN)"
 	@echo "DOMAIN_NAME = $(DOMAIN_NAME)"
 	@echo
-	@sleep 5
+	@echo "Press enter to proceed"
+	@read
 
 
 login:
@@ -191,7 +195,7 @@ deploygogs:
 
 deploynexus:
 	@echo "Deploying nexus..."
-	@oc new-app -f https://raw.githubusercontent.com/chengkuangan/templates/master/nexus3-persistent-templates.yaml -n $(PROJ_TOOLS_NAME)
+	@oc new-app -f https://raw.githubusercontent.com/chengkuangan/templates/master/nexus3-persistent-templates.yaml -n $(PROJ_TOOLS_NAME) -p NEXUS_REQUEST_MEM=3Gi -p NEXUS_LIMIT_MEM=4Gi
 
 deploysonarqube:
 	@echo "Deploying sonarqube..."
@@ -199,7 +203,7 @@ deploysonarqube:
 
 deployjenkins:
 	  @echo "Deploying Jenkins..."
-	  @oc new-app jenkins-persistent -n $(PROJ_TOOLS_NAME)
+	  @oc new-app jenkins-persistent -n $(PROJ_TOOLS_NAME) -p MEMORY_LIMIT=4Gi
 else
 deploygogs:
 	@echo "Not deploying gogs"
@@ -213,6 +217,22 @@ deploysonarqube:
 deployjenkins:
 	@echo "Not deploying jenkins"
 endif
+
+
+#waitforjenkins:
+#	@$(BASE)/scripts/waitforpod $(PROJ_TOOLS_NAME) jenkins
+
+createjenkinsjob:
+	@echo "Create a working copy of Jenkins Job template xml file..."
+	@cp $(BASE)/templates/jenkins-job.xml /tmp/jenkins-job-work.xml
+	@echo "Update the jenkins template file with the actual demo environment settings..."
+	@sed -i -e "s/https:\/\/github.com\/chengkuangan\/nationalparks.git/http:\/\/gogs:3000\/$(GOGSUSER)\/nationalparks.git/g" /tmp/jenkins-job-work.xml
+	@sed -i -e "s/<name>demo1<\/name>/<name>$(GOGSUSER)<\/name>/g" /tmp/jenkins-job-work.xml
+	@$(BASE)/scripts/jenkinsavailable $(PROJ_TOOLS_NAME)
+	@echo "Create Jenkins job definition..."
+	@oc rsh -n $(PROJ_TOOLS_NAME) dc/jenkins mkdir -p /var/lib/jenkins/jobs/nationalparks
+	@oc cp -n $(PROJ_TOOLS_NAME) /tmp/jenkins-job-work.xml `oc get -n $(PROJ_TOOLS_NAME) pods -o custom-columns=:.metadata.name | grep jenkins | grep -v deploy`:/var/lib/jenkins/jobs/nationalparks/config.xml
+	@rm -f /tmp/jenkins-job-work.xml
 
 preparedev:
 	@if [ $(CREATE_ENVIRONMENT_PROJ) -eq 1 ]; then \
@@ -265,28 +285,17 @@ prepareprod:
 	fi
 
 waitforgogspod:
-	@$(BASE)/scripts/waitforgogspod $(PROJ_TOOLS_NAME)
+	@$(BASE)/scripts/waitforpod $(PROJ_TOOLS_NAME) gogs
 
-clonenationalparks:
+creategogsuser:
+	@echo "Creating gogs user..."
+	@oc rsh -n $(PROJ_TOOLS_NAME) dc/gogs-postgresql /bin/sh -c 'LD_LIBRARY_PATH=/opt/rh/rh-postgresql95/root/usr/lib64 /opt/rh/rh-postgresql95/root/usr/bin/psql -U gogs -d gogs -c "INSERT INTO public.user (lower_name,name,email,passwd,rands,salt,max_repo_creation,avatar,avatar_email,num_repos) VALUES ('"'$(GOGSUSER)','$(GOGSUSER)','$(GOGSUSER)@gogs,com','40d76f42148716323d6b398f835438c7aec43f41f3ca1ea6e021192f993e1dc4acd95f36264ffe16812a954ba57492f4c107','konHCHTY7M','9XecGGR6cW',-1,'e4eba08430c43ef06e425e2e9b7a740f','$(GOGSUSER)@gogs.com',1"')"'
+
+clonenationalparks: creategogsuser
 	@$(BASE)/scripts/clonenationalparks $(PROJ_TOOLS_NAME) $(GOGSUSER) $(GOGSPASSWORD) $(PROJ_NAME_PREFIX) $(DOMAIN_NAME)
 
-waitforjenkins:
-	@$(BASE)/scripts/waitforpod $(PROJ_TOOLS_NAME) jenkins
-
-createjenkinsjob:
-	@echo "Downloading the jenkins-cli.jar from the Jenkins Server..."
-	@curl -k https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)/jnlpJars/jenkins-cli.jar --output /tmp/jenkins-cli.jar
-	@echo "Create a working copy of Jenkins Job template xml file..."
-	@cp $(BASE)/templates/jenkins-job.xml /tmp/jenkins-job-work.xml
-	@echo "Update the jenkins template file with the actual demo environment settings..."
-	sed -i -e "s/https:\/\/github.com\/chengkuangan\/nationalparks.git/http:\/\/gogs:3000\/$(GOGSUSER)\/nationalparks.git/g" /tmp/jenkins-job-work.xml
-	sed -i -e "s/<name>demo1<\/name>/<name>$(GOGSUSER)<\/name>/g" /tmp/jenkins-job-work.xml
-	@echo "Create Jenkins job definition..."
-	java -jar /tmp/jenkins-cli.jar -s https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)/ -noCertificateCheck -auth $(JENKINS_USERNAME):$(JENKINS_TOKEN) create-job nationalparks < /tmp/jenkins-job-work.xml
-	#rm -f /tmp/jenkins-job-work.xml
-
 waitfornexus:
-	@$(BASE)/scripts/waitfornexus $(PROJ_TOOLS_NAME)
+	@$(BASE)/scripts/waitforpod $(PROJ_TOOLS_NAME) nexus3
 
 configurenexus:
 	@$(BASE)/scripts/configurenexus $(PROJ_TOOLS_NAME)

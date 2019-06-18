@@ -14,14 +14,18 @@ if [ -z "$ROUTE" ]; then
   exit 1
 fi
 
-ROUTE="http://${ROUTE}"
-echo -n "Waiting for ${ROUTENAME} to come up..."
+SCHEME="http"
+if [ "$(oc get route/${ROUTENAME} -n ${PROJECT} --template='{{.spec.tls}}' 2> /dev/null)" != "<no value>" ]; then
+  SCHEME="https"
+fi
+
+ROUTE="${SCHEME}://${ROUTE}"
+echo -n "Waiting for ${ROUTE} to come up..."
 RC=0
-while [ $RC -ne 200 ]; do
+while [ $RC -ne 200 -a $RC -ne 302 -a $RC -ne 403 ]; do
   sleep 5
-  RC=$(curl -sL -w "%{http_code}" ${ROUTE} -o /dev/null)
+  RC=$(curl -k -sL -w "%{http_code}" ${ROUTE} -o /dev/null)
   echo -n "."
 done
 
-echo
-echo "Done"
+echo "done"
