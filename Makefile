@@ -1,18 +1,5 @@
 BASE=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-# Set this to 1 if running on RHPDS, 0 otherwise
-ON_RHPDS=$(shell $(BASE)/scripts/onrhpds)
-
-ifeq ($(ON_RHPDS), 1)
-	MASTER_NODE_URL=$(shell $(BASE)/scripts/rhpdsmasterurl)
-	USERNAME=user1
-	PASSWORD=openshift
-else
-	MASTER_NODE_URL=https://localhost:8443
-	USERNAME=developer
-	PASSWORD=developer
-endif
-
 # t - create tools, n - create national parks, p - create parks map, m - create MLB parks
 DEMO_SCOPE=tnmp
 
@@ -60,6 +47,25 @@ GOGSPASSWORD=gogs
 JENKINS_USERNAME=jenkins
 JENKINS_TOKEN=jenkins
 
+PROD_NATIONALPARKS_SERVER_GREEN=nationalparks-green
+PROD_NATIONALPARKS_SERVER_BLUE=nationalparks-blue
+PROD_PARKSMAP_SERVER_GREEN=parksmap-web-green
+PROD_PARKSMAP_SERVER_BLUE=parksmap-web-blue
+
+# Set this to 1 if running on RHPDS, 0 otherwise
+ON_RHPDS=$(shell $(BASE)/scripts/onrhpds)
+
+
+ifeq ($(ON_RHPDS), 1)
+	MASTER_NODE_URL=$(shell $(BASE)/scripts/rhpdsmasterurl)
+	USERNAME=user1
+	PASSWORD=openshift
+else
+	MASTER_NODE_URL=https://localhost:8443
+	USERNAME=developer
+	PASSWORD=developer
+endif
+
 PROJ_TOOLS_NAME=$(PROJ_NAME_PREFIX)tools
 PROJ_DEV_NAME=$(PROJ_NAME_PREFIX)dev
 PROJ_TEST_NAME=$(PROJ_NAME_PREFIX)test
@@ -67,6 +73,14 @@ PROJ_PROD_NAME=$(PROJ_NAME_PREFIX)prod
 
 DOMAIN_NAME=$(shell $(BASE)/scripts/getroutingsuffix)
 
+
+
+# For testing purposes
+ON_RHPDS=1
+MASTER_NODE_URL=https://master.sing-f1a3.openshiftworkshop.com
+USERNAME=user1
+PASSWORD=openshift
+DOMAIN_NAME=apps.sing-f1a3.openshiftworkshop.com
 
 
 # Set this if you need to install templates and quickstarts.
@@ -144,16 +158,16 @@ login:
 
 
 createprojects:
-	ifeq ($(CREATE_TOOLS), 1)
-	  @echo "Creating tools project..."
-	  @oc new-project $(PROJ_TOOLS_NAME) --display-name="Tools"	
-	endif
-	ifeq ($(CREATE_ENVIRONMENT_PROJ), 1)
-	  @echo "Creating projects for environments..."
-	  @oc new-project $(PROJ_DEV_NAME) --display-name="Development Environment"
-      @oc new-project $(PROJ_TEST_NAME) --display-name="Test Environment"
-      @oc new-project $(PROJ_PROD_NAME) --display-name="Production Environment"
-	endif
+	@if [ $(CREATE_TOOLS) -eq 1 ]; then \
+	  echo "Creating tools project..."; \
+	  oc new-project $(PROJ_TOOLS_NAME) --display-name="Tools"; \
+	fi
+	@if [ $(CREATE_ENVIRONMENT_PROJ) -eq 1 ]; then \
+	  echo "Creating projects for environments..."; \
+	  oc new-project $(PROJ_DEV_NAME) --display-name="Development Environment"; \
+      oc new-project $(PROJ_TEST_NAME) --display-name="Test Environment"; \
+      oc new-project $(PROJ_PROD_NAME) --display-name="Production Environment"; \
+	fi
 
 
 provisionroles:
@@ -170,90 +184,85 @@ provisionroles:
 	@oc policy add-role-to-user view system:serviceaccount:$(PROJ_PROD_NAME):default -n $(PROJ_PROD_NAME)
 
 
+ifeq ($(CREATE_TOOLS), 1)
 deploygogs:
-	ifeq ($(CREATE_TOOLS), 1)
 	  @echo "Deploying gogs..."
 	  @oc new-app -f https://raw.githubusercontent.com/chengkuangan/templates/master/gogs-persistent-template.yaml -p SKIP_TLS_VERIFY=true -n $(PROJ_TOOLS_NAME)
-	endif
-
 
 deploynexus:
-	ifeq ($(CREATE_TOOLS), 1)
-	  @echo "Deploying nexus..."
-	  @oc new-app -f https://raw.githubusercontent.com/chengkuangan/templates/master/nexus3-persistent-templates.yaml -n $(PROJ_TOOLS_NAME)
-	endif
-
+	@echo "Deploying nexus..."
+	@oc new-app -f https://raw.githubusercontent.com/chengkuangan/templates/master/nexus3-persistent-templates.yaml -n $(PROJ_TOOLS_NAME)
 
 deploysonarqube:
-	ifeq ($(CREATE_TOOLS), 1)
-	  @echo "Deploying sonarqube..."
-	  @oc new-app -f $(BASE)/templates/sonarqube-persistent-templates.yaml -n $(PROJ_TOOLS_NAME)
-	endif
-
+	@echo "Deploying sonarqube..."
+	@oc new-app -f $(BASE)/templates/sonarqube-persistent-templates.yaml -n $(PROJ_TOOLS_NAME)
 
 deployjenkins:
-	ifeq ($(CREATE_TOOLS), 1)
 	  @echo "Deploying Jenkins..."
 	  @oc new-app jenkins-persistent -n $(PROJ_TOOLS_NAME)
-	endif
+else
+deploygogs:
+	@echo "Not deploying gogs"
 
+deploynexus:
+	@echo "Not deploying nexus"
+
+deploysonarqube:
+	@echo "Not deploying sonarqube"
+
+deployjenkins:
+	@echo "Not deploying jenkins"
+endif
 
 preparedev:
-	ifeq ($(CREATE_ENVIRONMENT_PROJ), 1)
-	  @echo "Preparing development environment..."
-	  ifeq ($(CREATE_NATIONALPARKS), 1)
-	    @echo "Provisioning nationalparks..."
-	    @oc new-app -n $(PROJ_DEV_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-persistent-templates.yaml -p IMAGE_NAME=DevelopmentReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(NATIONALPARKS_APPLICATION_NAME)
-        # label nationalparks as parksmap backend
-        @oc label service $(NATIONALPARKS_APPLICATION_NAME) type=parksmap-backend -n $(PROJ_DEV_NAME)
-	  endif
-	  ifeq ($(CREATE_PARKSMAP), 1)
-	    @echo "Provisioning parksmap-web..."
-		@oc new-app -n $(PROJ_DEV_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/parksmap-web-dev-templates.yaml -p IMAGE_NAME=DevelopmentReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PARKSMAP_APPLICATION_NAME)
-	  endif
-	endif
+	@if [ $(CREATE_ENVIRONMENT_PROJ) -eq 1 ]; then \
+	  echo "Preparing development environment..."; \
+	  if [ $(CREATE_NATIONALPARKS) -eq 1 ]; then \
+	    echo "Provisioning nationalparks..."; \
+	    oc new-app -n $(PROJ_DEV_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-persistent-templates.yaml -p IMAGE_NAME=DevelopmentReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(NATIONALPARKS_APPLICATION_NAME); \
+        oc label service $(NATIONALPARKS_APPLICATION_NAME) type=parksmap-backend -n $(PROJ_DEV_NAME); \
+	  fi; \
+	  if [ $(CREATE_PARKSMAP) -eq 1 ]; then \
+	    echo "Provisioning parksmap-web..."; \
+		oc new-app -n $(PROJ_DEV_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/parksmap-web-dev-templates.yaml -p IMAGE_NAME=DevelopmentReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PARKSMAP_APPLICATION_NAME); \
+	  fi; \
+	fi
 
 
 preparetest:
-	ifeq ($(CREATE_ENVIRONMENT_PROJ), 1)
-	  @echo "Preparing test environment..."
-	  ifeq ($(CREATE_NATIONALPARKS), 1)
-	    @echo "Provisioning nationalparks..."
-	    @oc new-app -n $(PROJ_TEST_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-persistent-nobuild-templates.yaml -p IMAGE_NAME=TestReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME)
-        # label nationalparks as parksmap backend
-        @oc label service $(NATIONALPARKS_APPLICATION_NAME) type=parksmap-backend -n $(PROJ_TEST_NAME)
-	  endif
-	  ifeq ($(CREATE_PARKSMAP), 1)
-	    @echo "Provisioning parksmap-web..."
-		@oc new-app -n $(PROJ_TEST_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/parksmap-web-test-templates.yaml -p IMAGE_NAME=TestReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME)
-	  endif
-	endif
+	@if [ $(CREATE_ENVIRONMENT_PROJ) -eq 1 ]; then \
+	  echo "Preparing test environment..."; \
+	  if [ $(CREATE_NATIONALPARKS) -eq 1 ]; then \
+	    echo "Provisioning nationalparks..."; \
+	    oc new-app -n $(PROJ_TEST_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-persistent-nobuild-templates.yaml -p IMAGE_NAME=TestReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME); \
+        oc label service $(NATIONALPARKS_APPLICATION_NAME) type=parksmap-backend -n $(PROJ_TEST_NAME); \
+	  fi; \
+	  if [ $(CREATE_PARKSMAP) -eq 1 ]; then \
+	    echo "Provisioning parksmap-web..."; \
+		oc new-app -n $(PROJ_TEST_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/parksmap-web-test-templates.yaml -p IMAGE_NAME=TestReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME); \
+	  fi; \
+	fi
 
 
 prepareprod:
-	ifeq ($(CREATE_ENVIRONMENT_PROJ), 1)
-	  @echo "Preparing production environment..."
-	  ifeq ($(CREATE_NATIONALPARKS), 1)
-	    @echo "Provisioning nationalparks..."
-	    PROD_NATIONALPARKS_SERVER_GREEN=nationalparks-green
-	    PROD_NATIONALPARKS_SERVER_BLUE=nationalparks-blue
-	    @oc new-app -n $(PROJ_PROD_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PROD_NATIONALPARKS_SERVER_GREEN) -p PROD_ENV_VERSION="Green"
-	    @oc new-app -n $(PROJ_PROD_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PROD_NATIONALPARKS_SERVER_BLUE) -p PROD_ENV_VERSION="Blue"
-	    @oc new-app -n $(PROJ_PROD_NAME) -f $(BASE)/templates/nationalparks-mongodb-prod-templates.yaml
-		@oc patch dc $(PROD_NATIONALPARKS_SERVER_GREEN) --patch "{\"spec\": { \"triggers\": []}}" -n $(PROJ_PROD_NAME)
-	    @oc patch dc $(PROD_NATIONALPARKS_SERVER_BLUE) --patch "{\"spec\": { \"triggers\": []}}" -n $(PROJ_PROD_NAME)
-	    @oc expose svc/$(PROD_NATIONALPARKS_SERVER_GREEN) --name=nationalparks-bluegreen -n $(PROJ_PROD_NAME)
-	  endif
-	  ifeq ($(CREATE_PARKSMAP), 1)
-	    @echo "Provisioning parksmap-web..."
-		@PROD_PARKSMAP_SERVER_GREEN=parksmap-web-green
-	    @PROD_PARKSMAP_SERVER_BLUE=parksmap-web-blue
-	    @oc new-app -n $(PROJ_PROD_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PROD_PARKSMAP_SERVER_GREEN)
-	    @oc new-app -n $(PROJ_PROD_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PROD_PARKSMAP_SERVER_BLUE)
-
-	    @oc expose svc/$(PROD_PARKSMAP_SERVER_GREEN) --name=parksmap-web-bluegreen -n $(PROJ_PROD_NAME)
-	  endif
-	endif
+	if [ $(CREATE_ENVIRONMENT_PROJ) -eq 1 ]; then \
+	  echo "Preparing production environment..."; \
+	  if [ $(CREATE_NATIONALPARKS) -eq 1 ]; then \
+	    echo "Provisioning nationalparks..."; \
+	    oc new-app -n $(PROJ_PROD_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PROD_NATIONALPARKS_SERVER_GREEN) -p PROD_ENV_VERSION="Green"; \
+	    oc new-app -n $(PROJ_PROD_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PROD_NATIONALPARKS_SERVER_BLUE) -p PROD_ENV_VERSION="Blue"; \
+	    oc new-app -n $(PROJ_PROD_NAME) -f $(BASE)/templates/nationalparks-mongodb-prod-templates.yaml; \
+		oc patch dc $(PROD_NATIONALPARKS_SERVER_GREEN) --patch "{\"spec\": { \"triggers\": []}}" -n $(PROJ_PROD_NAME); \
+	    oc patch dc $(PROD_NATIONALPARKS_SERVER_BLUE) --patch "{\"spec\": { \"triggers\": []}}" -n $(PROJ_PROD_NAME); \
+	    oc expose svc/$(PROD_NATIONALPARKS_SERVER_GREEN) --name=nationalparks-bluegreen -n $(PROJ_PROD_NAME); \
+	  fi; \
+	  if [ $(CREATE_PARKSMAP) -eq 1 ]; then \
+	    echo "Provisioning parksmap-web..."; \
+	    oc new-app -n $(PROJ_PROD_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PROD_PARKSMAP_SERVER_GREEN) -p PROD_ENV_VERSION="Green"; \
+	    oc new-app -n $(PROJ_PROD_NAME) --allow-missing-imagestream-tags=true -f $(BASE)/templates/nationalparks-prod-templates.yaml -p IMAGE_NAME=ProdReady -p IMAGE_PROJECT_NAME=$(PROJ_DEV_NAME) -p APPLICATION_NAME=$(PROD_PARKSMAP_SERVER_BLUE) -p PROD_ENV_VERSION="Blue"; \
+	    oc expose svc/${PROD_PARKSMAP_SERVER_GREEN} --name=parksmap-web-bluegreen -n $(PROJ_PROD_NAME); \
+	  fi; \
+	fi
 
 waitforgogspod:
 	@$(BASE)/scripts/waitforgogspod $(PROJ_TOOLS_NAME)
