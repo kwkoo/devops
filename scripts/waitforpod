@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 PROJECT ROUTENAME"
+  exit 1
+fi
+
+PROJECT=$1
+ROUTENAME=$2
+
+ROUTE=$(oc get route/${ROUTENAME} -n ${PROJECT} --template='{{.spec.host}}' 2> /dev/null)
+if [ -z "$ROUTE" ]; then
+  echo "Route $ROUTENAME does not exist in project $PROJECT"
+  exit 1
+fi
+
+ROUTE="http://${ROUTE}"
+echo -n "Waiting for ${ROUTENAME} to come up..."
+RC=0
+while [ $RC -ne 200 ]; do
+  sleep 5
+  RC=$(curl -sL -w "%{http_code}" ${ROUTE} -o /dev/null)
+  echo -n "."
+done
+
+echo
+echo "Done"

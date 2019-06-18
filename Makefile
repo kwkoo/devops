@@ -87,10 +87,10 @@ DOMAIN_NAME=apps.sing-f1a3.openshiftworkshop.com
 #REGISTRY_USERNAME=
 #REGISTRY_PASSWORD=
 
-.PHONY: deployall clean deploytemplates printvariables login clean createprojects provisionroles deploygogs deploynexus deployjenkins preparedev preparetest prepareprod waitforgogspod clonenationalparks createjenkinsjob waitfornexus configurenexus
+.PHONY: deployall clean deploytemplates printvariables login clean createprojects provisionroles deploygogs deploynexus deployjenkins preparedev preparetest prepareprod waitforgogspod clonenationalparks waitforjenkins createjenkinsjob waitfornexus configurenexus
 
 
-deployall: printvariables deploytemplates login createprojects provisionroles deploygogs deploynexus deployjenkins preparedev preparetest prepareprod waitforgogspod clonenationalparks createjenkinsjob waitfornexus configurenexus
+deployall: printvariables deploytemplates login createprojects provisionroles deploygogs deploynexus deployjenkins preparedev preparetest prepareprod waitforgogspod clonenationalparks waitforjenkins createjenkinsjob waitfornexus configurenexus
 	@echo "Done"
 
 clean:
@@ -269,6 +269,9 @@ waitforgogspod:
 
 clonenationalparks:
 	@$(BASE)/scripts/clonenationalparks $(PROJ_TOOLS_NAME) $(GOGSUSER) $(GOGSPASSWORD) $(PROJ_NAME_PREFIX) $(DOMAIN_NAME)
+
+waitforjenkins:
+	@$(BASE)/scripts/waitforpod $(PROJ_TOOLS_NAME) jenkins
 
 createjenkinsjob:
 	@echo "Downloading the jenkins-cli.jar from the Jenkins Server..."
