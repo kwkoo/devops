@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+	echo "Usage: $0 NEXUS_PROJECT"
+	exit 1
+fi
+
+PROJECTNAME=$1
+
+NEXUS_ROUTE_NAME="$(oc get routes --no-headers  -o custom-columns=Name:metadata.name -n $PROJECTNAME | grep nexus3)"
+
+if [ -z "${NEXUS_ROUTE_NAME}" ]; then
+    echo "Nexus route name is not valid - name: ${NEXUS_ROUTE_NAME}"
+    exit 1
+fi
+
+NEXUS_HOSTNAME="$(oc get route ${NEXUS_ROUTE_NAME} --no-headers  -o custom-columns=domain:spec.host  -n $PROJECTNAME)"
+echo "Nexus Hostname: ${NEXUS_HOSTNAME}"
+if [ -z "${NEXUS_HOSTNAME}" ]; then
+    echo "Nexus hostname is not valid"
+    exit 1
+fi
+
+echo "Creating Red Hat Repo in Nexus..."
+curl -o /tmp/nexus-functions -s https://raw.githubusercontent.com/chengkuangan/scripts/master/configure_nexus3_repo.sh
+source /tmp/nexus-functions admin admin123 http://${NEXUS_HOSTNAME}
+
+#rm -f /tmp/nexus-functions

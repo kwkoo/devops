@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+	echo "Usage: $0 PROJECT"
+	exit 1
+fi
+
+PROJ=$1
+
+oc get project $PROJ &> /dev/null
+
+if [ "$?" -eq "0" ]; then
+	echo "Project $PROJ exists, deleting..."
+	oc delete project $PROJ >> /dev/null
+else
+	echo "Project $PROJ doesn't exist."
+fi

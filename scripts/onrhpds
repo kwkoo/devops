@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Check if we're running in RHPDS.
+#
+if [[ "${HOSTNAME}" != "bastion."* ]]; then
+  echo "0"
+  exit 0
+fi
+
+if [[ "${HOSTNAME}" != *".openshiftworkshop.com" ]]; then
+  echo "0"
+  exit 0
+fi
+
+echo "1"

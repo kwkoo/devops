@@ -1,0 +1,31 @@
+#!/bin/bash
+
+
+function rhpds_routing_suffix {
+  CITYGUID=$(echo $HOSTNAME | sed -e 's/bastion.\([^.]*\).openshiftworkshop.com/\1/')
+  if [ -n "$CITYGUID" ]; then
+    echo "apps.${CITYGUID}.openshiftworkshop.com"
+    exit 0
+  fi
+}
+
+# Check if we're running in minishift.
+#
+which minishift >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo "$(minishift ip).nip.io"
+  exit 0
+fi
+
+# Check if we're running in RHPDS.
+#
+if [[ "${HOSTNAME}" != "bastion."* ]]; then
+  rhpds_routing_suffix
+fi
+if [[ "${HOSTNAME}" != *".openshiftworkshop.com" ]]; then
+  rhpds_routing_suffix
+fi
+
+
+# Failsafe - assume we're running an all-in-one locally.
+echo $(ip address show dev eth0 | grep "inet " | awk '{ print $2 }' | cut -d / -f 1).nip.io
