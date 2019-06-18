@@ -2,6 +2,28 @@ BASE=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 # t - create tools, n - create national parks, p - create parks map, m - create MLB parks
 DEMO_SCOPE=tnmp
+PROJ_NAME_PREFIX=gck-
+PROJ_TOOLS_NAME=tools
+PROJ_DEV_NAME=dev
+PROJ_TEST_NAME=test
+PROJ_PROD_NAME=prod
+NEXUS_SERVICE_NAME=nexus3
+NATIONALPARKS_APPLICATION_NAME=nationalparks
+PARKSMAP_APPLICATION_NAME=parksmap-web
+LOGOUT_WHEN_DONE=0
+
+# If you use something other than gogs / gogs, you will need to create the
+# user manually in gogs. The creategogsuser target hardcodes the password to
+# gogs.
+#
+GOGSUSER=gogs
+GOGSPASSWORD=gogs
+
+
+PROD_NATIONALPARKS_SERVER_GREEN=nationalparks-green
+PROD_NATIONALPARKS_SERVER_BLUE=nationalparks-blue
+PROD_PARKSMAP_SERVER_GREEN=parksmap-web-green
+PROD_PARKSMAP_SERVER_BLUE=parksmap-web-blue
 
 CREATE_ENVIRONMENT_PROJ=0
 ifneq (,$(findstring t,$(DEMO_SCOPE)))
@@ -31,34 +53,10 @@ else
 	CREATE_MLBPARKS=0
 endif
 
-PROJ_NAME_PREFIX=gck-
-PROJ_TOOLS_NAME=tools
-PROJ_DEV_NAME=dev
-PROJ_TEST_NAME=test
-PROJ_PROD_NAME=prod
-NEXUS_SERVICE_NAME=nexus3
-NATIONALPARKS_APPLICATION_NAME=nationalparks
-PARKSMAP_APPLICATION_NAME=parksmap-web
-
-LOGOUT_WHEN_DONE=0
-
-# If you use something other than gogs / gogs, you will need to create the
-# user manually in gogs.
-GOGSUSER=gogs
-GOGSPASSWORD=gogs
-
-JENKINS_USERNAME=jenkins
-JENKINS_TOKEN=jenkins
-
-PROD_NATIONALPARKS_SERVER_GREEN=nationalparks-green
-PROD_NATIONALPARKS_SERVER_BLUE=nationalparks-blue
-PROD_PARKSMAP_SERVER_GREEN=parksmap-web-green
-PROD_PARKSMAP_SERVER_BLUE=parksmap-web-blue
-
-# Set this to 1 if running on RHPDS, 0 otherwise
+# Set this to 1 if running on RHPDS, 0 otherwise.
 ON_RHPDS=$(shell $(BASE)/scripts/onrhpds)
 
-
+# Try to autodetect variables.
 ifeq ($(ON_RHPDS), 1)
 	MASTER_NODE_URL=$(shell $(BASE)/scripts/rhpdsmasterurl)
 	USERNAME=user1
@@ -69,32 +67,43 @@ else
 	PASSWORD=developer
 endif
 
+DOMAIN_NAME=$(shell $(BASE)/scripts/getroutingsuffix)
+
+
+# RHPDS but not on bastion
+# Uncomment this block if you are deploying to RHPDS but are not running this
+# on bastion (e.g. you are running this on your laptop).
+#
+#CITYGUID=XXXX-XXXX
+#ON_RHPDS=1
+#MASTER_NODE_URL=https://master.$(CITYGUID).openshiftworkshop.com
+#USERNAME=user1
+#PASSWORD=openshift
+#DOMAIN_NAME=apps.$(CITYGUID).openshiftworkshop.com
+
+
+# Set this if you need to install templates and quickstarts (if you are
+# installing on OKD).
+#REGISTRY_USERNAME=
+#REGISTRY_PASSWORD=
+
+##################################################
+# You should not need to change anything below   #
+# this block.                                    #
+##################################################
+
 PROJ_TOOLS_NAME=$(PROJ_NAME_PREFIX)tools
 PROJ_DEV_NAME=$(PROJ_NAME_PREFIX)dev
 PROJ_TEST_NAME=$(PROJ_NAME_PREFIX)test
 PROJ_PROD_NAME=$(PROJ_NAME_PREFIX)prod
 
-DOMAIN_NAME=$(shell $(BASE)/scripts/getroutingsuffix)
-
-
-
-# For testing purposes
-ON_RHPDS=1
-MASTER_NODE_URL=https://master.sing-f1a3.openshiftworkshop.com
-USERNAME=user1
-PASSWORD=openshift
-DOMAIN_NAME=apps.sing-f1a3.openshiftworkshop.com
-
-
-# Set this if you need to install templates and quickstarts.
-#REGISTRY_USERNAME=
-#REGISTRY_PASSWORD=
-
 .PHONY: deployall clean deploytemplates printvariables login clean createprojects provisionroles deploygogs deploynexus deployjenkins preparedev preparetest prepareprod waitforgogspod clonenationalparks waitforjenkins createjenkinsjob waitfornexus configurenexus
 
 
 deployall: printvariables deploytemplates login createprojects provisionroles deploygogs deploynexus deployjenkins createjenkinsjob preparedev preparetest prepareprod waitforgogspod clonenationalparks waitfornexus configurenexus
-	@echo "Done"
+	@echo
+	@echo "Deployment complete"
+
 
 clean:
 	@echo "Removing projects..."
@@ -148,8 +157,6 @@ printvariables:
 	@echo "CREATE_ENVIRONMENT_PROJ = $(CREATE_ENVIRONMENT_PROJ)"
 	@echo "GOGSUSER = $(GOGSUSER)"
 	@echo "GOGSPASSWORD = $(GOGSPASSWORD)"
-	@echo "JENKINS_USERNAME = $(JENKINS_USERNAME)"
-	@echo "JENKINS_TOKEN = $(JENKINS_TOKEN)"
 	@echo "DOMAIN_NAME = $(DOMAIN_NAME)"
 	@echo
 	@echo "Press enter to proceed"
@@ -234,6 +241,7 @@ createjenkinsjob:
 	@oc cp -n $(PROJ_TOOLS_NAME) /tmp/jenkins-job-work.xml `oc get -n $(PROJ_TOOLS_NAME) pods -o custom-columns=:.metadata.name | grep jenkins | grep -v deploy`:/var/lib/jenkins/jobs/nationalparks/config.xml
 	@rm -f /tmp/jenkins-job-work.xml
 
+
 preparedev:
 	@if [ $(CREATE_ENVIRONMENT_PROJ) -eq 1 ]; then \
 	  echo "Preparing development environment..."; \
@@ -284,18 +292,27 @@ prepareprod:
 	  fi; \
 	fi
 
+
 waitforgogspod:
 	@$(BASE)/scripts/waitforpod $(PROJ_TOOLS_NAME) gogs
+
 
 creategogsuser:
 	@echo "Creating gogs user..."
 	@oc rsh -n $(PROJ_TOOLS_NAME) dc/gogs-postgresql /bin/sh -c 'LD_LIBRARY_PATH=/opt/rh/rh-postgresql95/root/usr/lib64 /opt/rh/rh-postgresql95/root/usr/bin/psql -U gogs -d gogs -c "INSERT INTO public.user (lower_name,name,email,passwd,rands,salt,max_repo_creation,avatar,avatar_email,num_repos) VALUES ('"'$(GOGSUSER)','$(GOGSUSER)','$(GOGSUSER)@gogs,com','40d76f42148716323d6b398f835438c7aec43f41f3ca1ea6e021192f993e1dc4acd95f36264ffe16812a954ba57492f4c107','konHCHTY7M','9XecGGR6cW',-1,'e4eba08430c43ef06e425e2e9b7a740f','$(GOGSUSER)@gogs.com',1"')"'
 
+
 clonenationalparks: creategogsuser
 	@$(BASE)/scripts/clonenationalparks $(PROJ_TOOLS_NAME) $(GOGSUSER) $(GOGSPASSWORD) $(PROJ_NAME_PREFIX) $(DOMAIN_NAME)
+
 
 waitfornexus:
 	@$(BASE)/scripts/waitforpod $(PROJ_TOOLS_NAME) nexus3
 
+
 configurenexus:
 	@$(BASE)/scripts/configurenexus $(PROJ_TOOLS_NAME)
+
+
+console:
+	@open $(MASTER_NODE_URL)/console
