@@ -32,6 +32,35 @@ jenkins.
 * `make gogs` - Opens a web browser to the Gogs web console.
 * `make jenkins` - Opens a web browser to the Jenkins web console.
 
+## Integrating Gogs with Jenkins
+
+Follow this steps to have Gogs trigger the Jenkins job every time you perform
+a `git push`:
+
+* Install the Gogs Jenkins plugin:
+    * Open `https://JENKINS_HOST/pluginManager`
+    * Select the `Available` tab.
+    * Enter `gogs` into the filter text field.
+    * Download and install the `Gogs plugin`, choosing to restart Jenkins after
+      the plugin is installed.
+* Generate an API token:
+    * On the Jenkins page, click on the down-arrow next to your username in
+      the top-right corner of the page and select `Configure`.
+    * Click on `Add new Token` in the `API Token` section, then click on
+      `Generate`.
+    * Copy the generated token.
+    * Click the `Save` button.
+* Configure a webhook in Gogs:
+    * Login to the Gogs web console, select the `nationalparks` repository,
+      and click on `Settings`.
+    * Click on `Webhooks` in the left pane, click `Add Webhook`, and select `Gogs`.
+    * Enter the following into the `Payload URL` field: `http://jenkins/gogs-webhook/?job=nationalparks`
+    * Set `Content Type` to `application/json`.
+    * Set the `Secret` field to the Jenkins API token that you generated earlier.
+    * Set `When should this webhook be triggered?` to `Just the push event`.
+    * Click `Add Webhook`.
+
+
 ## Video
 [Demo Video](https://www.dropbox.com/s/31bzz7ccrb9o0hz/OCP%20CICD%20Demo%202.mp4?dl=0)
 
