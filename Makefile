@@ -169,7 +169,7 @@ printvariables:
 
 login:
 	@echo "Logging into OpenShift..."
-	@oc login -u $(USERNAME) -p $(PASSWORD) $(MASTER_NODE_URL)
+	@oc login --insecure-skip-tls-verify -u $(USERNAME) -p $(PASSWORD) $(MASTER_NODE_URL)
 
 
 createprojects:
