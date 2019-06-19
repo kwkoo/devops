@@ -101,10 +101,16 @@ PROJ_DEV_NAME=$(PROJ_NAME_PREFIX)dev
 PROJ_TEST_NAME=$(PROJ_NAME_PREFIX)test
 PROJ_PROD_NAME=$(PROJ_NAME_PREFIX)prod
 
-.PHONY: deployall clean deploytemplates printvariables login clean createprojects provisionroles deploygogs deploynexus deployjenkins preparedev preparetest prepareprod waitforgogspod clonenationalparks waitforjenkins createjenkinsjob waitfornexus configurenexus
+.PHONY: deployall clean deploytemplates printvariables login clean \
+createprojects provisionroles deploygogs deploynexus deployjenkins preparedev \
+preparetest prepareprod waitforgogspod clonenationalparks waitforjenkins \
+createjenkinsjob waitfornexus configurenexus console gogs jenkins controller \
+wsinfo healthz apiload apiall
 
 
-deployall: printvariables deploytemplates login createprojects provisionroles deploygogs deploynexus deployjenkins createjenkinsjob preparedev preparetest prepareprod waitforgogspod clonenationalparks waitfornexus configurenexus
+deployall: printvariables deploytemplates login createprojects provisionroles \
+deploygogs deploynexus deployjenkins createjenkinsjob preparedev preparetest \
+prepareprod waitforgogspod clonenationalparks waitfornexus configurenexus
 	@echo
 	@echo "Deployment complete"
 
@@ -286,6 +292,8 @@ prepareprod:
 	    oc new-app -n $(PROJ_PROD_NAME) -f $(BASE)/templates/nationalparks-mongodb-prod-templates.yaml; \
 		oc patch dc $(PROD_NATIONALPARKS_SERVER_GREEN) --patch "{\"spec\": { \"triggers\": []}}" -n $(PROJ_PROD_NAME); \
 	    oc patch dc $(PROD_NATIONALPARKS_SERVER_BLUE) --patch "{\"spec\": { \"triggers\": []}}" -n $(PROJ_PROD_NAME); \
+		oc set probe -n $(PROJ_PROD_NAME) dc/nationalparks-blue --liveness --readiness --get-url=http://:8080/ws/healthz/; \
+		oc set probe -n $(PROJ_PROD_NAME) dc/nationalparks-green --liveness --readiness --get-url=http://:8080/ws/healthz/; \
 	    oc expose svc/$(PROD_NATIONALPARKS_SERVER_GREEN) --name=nationalparks-bluegreen -n $(PROJ_PROD_NAME); \
 	  fi; \
 	  if [ $(CREATE_PARKSMAP) -eq 1 ]; then \
@@ -319,24 +327,55 @@ configurenexus:
 
 
 console:
+	$(eval URL="$(MASTER_NODE_URL)/console")
 	@if [ "$(shell uname)" = "Darwin" ]; then \
-	  open $(MASTER_NODE_URL)/console; \
+	  open ${URL}; \
 	else \
-	  echo "$(MASTER_NODE_URL)/console"; \
+	  echo "${URL}"; \
 	fi
 
 gogs:
+	$(eval URL="http://gogs-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)")
 	@if [ "$(shell uname)" = "Darwin" ]; then \
-	  open http://gogs-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME); \
+	  open ${URL}; \
 	else \
-	  echo "http://gogs-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)"; \
+	  echo "${URL}"; \
 	fi
 
 
 jenkins:
+	$(eval URL="https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)")
 	@if [ "$(shell uname)" = "Darwin" ]; then \
-	  open https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME); \
+	  open ${URL}; \
 	else \
-	  echo "https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)"; \
+	  echo "${URL}"; \
 	fi
 
+
+controller:
+	$(eval URL="http://gogs-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)/gogs/nationalparks/src/master/src/main/java/com/openshift/evg/roadshow/parks/rest/BackendController.java")
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+	  open ${URL}; \
+	else \
+	  echo "${URL}"; \
+	fi
+
+
+wsinfo:
+	@curl http://$(shell oc get -n $(PROJ_PROD_NAME) route/nationalparks-bluegreen --template='{{.spec.host}}')/ws/info/
+	@echo
+
+
+healthz:
+	@curl http://$(shell oc get -n $(PROJ_PROD_NAME) route/nationalparks-bluegreen --template='{{.spec.host}}')/ws/healthz/
+	@echo
+
+
+apiload:
+	@curl http://$(shell oc get -n $(PROJ_PROD_NAME) route/nationalparks-bluegreen --template='{{.spec.host}}')/ws/data/load
+	@echo
+
+
+apiall:
+	@curl http://$(shell oc get -n $(PROJ_PROD_NAME) route/nationalparks-bluegreen --template='{{.spec.host}}')/ws/data/all
+	@echo

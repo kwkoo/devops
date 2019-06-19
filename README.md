@@ -31,6 +31,12 @@ jenkins.
 * `make console` - Opens a web browser to the OpenShift web console.
 * `make gogs` - Opens a web browser to the Gogs web console.
 * `make jenkins` - Opens a web browser to the Jenkins web console.
+* `make controller` - Opens a web browser to the `BackendController.java` file.
+* `make wsinfo` - Performs a `curl` request to the production `nationalparks` `/ws/info/` URI.
+* `make healthz` - Performs a `curl` request to the production `nationalparks` `/ws/healthz/` URI.
+* `make apiload` - Performs a `curl` request to the production `nationalparks` `/ws/data/load` URI.
+* `make apiall` - Performs a `curl` request to the production `nationalparks` `/ws/data/all` URI.
+
 
 ## Integrating Gogs with Jenkins
 
