@@ -1,30 +1,36 @@
 # DevOps Demo
 
-To setup the demo, you will need to run 2 shell scripts.
+## Installation
+In order to deploy this demo, you will need to clone this repo to your local
+machine. The local machine would need to have access to the `oc` tool.
 
-First, clone this repo to your local disk that will be able to use oc command to access to your OCP server.
+If you are deploying this demo to RHPDS and you are running this on the
+bastion host, everything should be autodetected and you should not need to
+change anything.
 
-Then, changed path to bin folder and run ./init.sh script to initialize the demo environment. This script will create a few OCP projects to represent
-dev, test, prod environments. A tools project will be created to keep the CI/CD tools such as jenkins, gogs and etc.
+However, if you are deploying this somewhere else, you should edit the
+`Makefile` and ensure that the following variables are set correctly:
 
-Once the demo environments have been provisioned. Make sure all the PODs under the tools project are all ready running without error. 
-Run the ./initDemoData.sh script to initilize the required demo data.
+* `ON_RHPDS`
+* `MASTER_NODE_URL`
+* `USERNAME`
+* `PASSWORD`
+* `DOMAIN_NAME`
 
-There are some manual steps required before running the initDemoData.sh script. Please run ./initDemoData.sh -h for more details.
+Once you've defined the variables in the `Makefile`, kick off the install by
+executing `make`.
 
-## Notes
-1. You may want to increase the resource limits for Jenkins and Nexus. Especially Nexus will need minimum 3GB RAM to run
-properly. These resource limits can be changed from the init.sh script using parameters before provisioning. 
-Allocation of 4GB will be the best for smooth demo experience. With lower memory allocation, Jenkins build will always fail caused by 
-Nexus keep restarting in the background. Higher memory ensure maven/build are cached once the first built has been done, which helps to cut down
-a lot of build time for all the subsequence builds. If you restarted the POD or server, make sure you have done a first build before the actual
-demo.
-2. Do a chmod +x init.sh if the script is without execution permission.
-3. Do a chmod +x initDemoData.sh if the script is without execution permission.
+This should set the whole demo up. After the installation, the only steps
+you'll need to perform manually would be to setup a webhook from gogs to
+jenkins.
 
 
-## To Do
-To be updated.
+## Other useful `make` targets
+
+* `make clean` - Deletes all relevant projects.
+* `make console` - Opens a web browser to the OpenShift web console.
+* `make gogs` - Opens a web browser to the Gogs web console.
+* `make jenkins` - Opens a web browser to the Jenkins web console.
 
 ## Video
 [Demo Video](https://www.dropbox.com/s/31bzz7ccrb9o0hz/OCP%20CICD%20Demo%202.mp4?dl=0)

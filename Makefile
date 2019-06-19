@@ -74,12 +74,16 @@ DOMAIN_NAME=$(shell $(BASE)/scripts/getroutingsuffix)
 # Uncomment this block if you are deploying to RHPDS but are not running this
 # on bastion (e.g. you are running this on your laptop).
 #
+# USERNAME refers to the OCP user that the demo is to be installed as, and
+# PASSWORD is the password for that user. These variables are used in the
+# "oc login" command.
+#
 #CITYGUID=XXXX-XXXX
 #ON_RHPDS=1
 #MASTER_NODE_URL=https://master.$(CITYGUID).openshiftworkshop.com
+#DOMAIN_NAME=apps.$(CITYGUID).openshiftworkshop.com
 #USERNAME=user1
 #PASSWORD=openshift
-#DOMAIN_NAME=apps.$(CITYGUID).openshiftworkshop.com
 
 
 # Set this if you need to install templates and quickstarts (if you are
@@ -316,3 +320,11 @@ configurenexus:
 
 console:
 	@open $(MASTER_NODE_URL)/console
+
+
+gogs:
+	@open http://gogs-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)
+
+
+jenkins:
+	@open https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)
