@@ -277,7 +277,7 @@ preparetest:
 
 
 prepareprod:
-	if [ $(CREATE_ENVIRONMENT_PROJ) -eq 1 ]; then \
+	@if [ $(CREATE_ENVIRONMENT_PROJ) -eq 1 ]; then \
 	  echo "Preparing production environment..."; \
 	  if [ $(CREATE_NATIONALPARKS) -eq 1 ]; then \
 	    echo "Provisioning nationalparks..."; \
@@ -319,12 +319,24 @@ configurenexus:
 
 
 console:
-	@open $(MASTER_NODE_URL)/console
-
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+	  open $(MASTER_NODE_URL)/console; \
+	else \
+	  echo "$(MASTER_NODE_URL)/console"; \
+	fi
 
 gogs:
-	@open http://gogs-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+	  open http://gogs-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME); \
+	else \
+	  echo "http://gogs-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)"; \
+	fi
 
 
 jenkins:
-	@open https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+	  open https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME); \
+	else \
+	  echo "https://jenkins-$(PROJ_TOOLS_NAME).$(DOMAIN_NAME)"; \
+	fi
+
