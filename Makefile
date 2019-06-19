@@ -56,13 +56,13 @@ endif
 # Set this to 1 if running on RHPDS, 0 otherwise.
 ON_RHPDS=$(shell $(BASE)/scripts/onrhpds)
 
+MASTER_NODE_URL=$(shell $(BASE)/scripts/masterurl)
+
 # Try to autodetect variables.
 ifeq ($(ON_RHPDS), 1)
-	MASTER_NODE_URL=$(shell $(BASE)/scripts/rhpdsmasterurl)
 	USERNAME=user1
 	PASSWORD=openshift
 else
-	MASTER_NODE_URL=https://localhost:8443
 	USERNAME=developer
 	PASSWORD=developer
 endif
@@ -85,11 +85,13 @@ DOMAIN_NAME=$(shell $(BASE)/scripts/getroutingsuffix)
 #USERNAME=user1
 #PASSWORD=openshift
 
-
 # Set this if you need to install templates and quickstarts (if you are
-# installing on OKD).
-#REGISTRY_USERNAME=
-#REGISTRY_PASSWORD=
+# installing on OKD). This needs to be set to your credentials for
+# registry.redhat.io.
+#
+REGISTRY_USERNAME=
+REGISTRY_PASSWORD=
+
 
 ##################################################
 # You should not need to change anything below   #
@@ -124,10 +126,16 @@ clean:
 
 
 deploytemplates:
-	@if [ $(ON_RHPDS) -eq 1 ]; then \
-		echo "Running on RHPDS - do not need to install default templates"; \
+	@if [ $(ON_RHPDS) -ne 1 ]; then \
+	  if [ -z "$(REGISTRY_USERNAME)" -o -z "$(REGISTRY_PASSWORD)" ]; then \
+	    echo "Error: You need to set the REGISTRY_USERNAME and REGISTRY_PASSWORD variables"; \
+		exit 1; \
+	  fi; \
+	fi
+	-@if [ $(ON_RHPDS) -eq 1 ]; then \
+		echo "Running on RHPDS - do not need to install templates"; \
 	else \
-		echo "Not running on RHPDS - we need to install default templates"; \
+		echo "Not running on RHPDS - we need to install templates"; \
 		oc login -u system:admin $(MASTER_NODE_URL); \
 		oc create secret docker-registry imagestreamsecret \
 		  --docker-username="$(REGISTRY_USERNAME)" \
@@ -136,7 +144,7 @@ deploytemplates:
 		  -n openshift \
 		  --as system:admin; \
 		oc create \
-		  -f https://raw.githubusercontent.com/openshift/library/master/official/java/templates/openjdk-web-basic-s2i.json \
+		  -f https://raw.githubusercontent.com/openshift/origin/master/examples/jenkins/jenkins-persistent-template.json \
 		  -n openshift; \
 		oc create \
 		  -f https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.4.16/openjdk/openjdk18-image-stream.json \
@@ -235,9 +243,6 @@ deployjenkins:
 	@echo "Not deploying jenkins"
 endif
 
-
-#waitforjenkins:
-#	@$(BASE)/scripts/waitforpod $(PROJ_TOOLS_NAME) jenkins
 
 createjenkinsjob:
 	@echo "Create a working copy of Jenkins Job template xml file..."

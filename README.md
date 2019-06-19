@@ -67,6 +67,12 @@ a `git push`:
     * Click `Add Webhook`.
 
 
+## Troubleshooting
+
+If you login to Jenkins and don't see the `nationalparks` job, try restarting
+Jenkins. The easiest way to do that is to go to `Jenkins` / `Manage Jenkins` /
+`Reload Configuration from Disk`. 
+
 ## Video
 [Demo Video](https://www.dropbox.com/s/31bzz7ccrb9o0hz/OCP%20CICD%20Demo%202.mp4?dl=0)
 
