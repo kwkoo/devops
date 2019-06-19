@@ -15,4 +15,14 @@ while [ -z "$POD_NAME" ]; do
    echo -n "."
 done
 
+echo
+
+STATUS=""
+echo -n "Checking if $POD_NAME is running..."
+while [ "$STATUS" != "Running" ]; do
+  sleep 5
+  STATUS="$(oc get -n $PROJECTNAME po/${POD_NAME} --template='{{.status.phase}}')"
+  echo -n "."
+done
+
 echo "done"
