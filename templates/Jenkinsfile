@@ -107,12 +107,12 @@ node('maven') {
       sh "oc project $prodProjectName && oc patch dc $targetSvc --patch '{\"spec\": { \"triggers\": [ { \"type\": \"ImageChange\", \"imageChangeParams\": { \"automatic\": true, \"containerNames\": [ \"$targetSvc\" ], \"from\": { \"kind\": \"ImageStreamTag\", \"namespace\": \"$prodImageNameN\", \"name\": \"$prodImageName\"}}}]}}' -n $prodProjectName"
     } catch (err) {}
     sh "oc project $prodProjectName && oc tag $testImageNameN/$testImageName $prodImageNameN/$prodImageName"
+    verifyNationalparksDB("http://$targetSvc:8080/ws/data/all/")
   }
 
   // Wait for rollout to complete
   stage('Wait for rollout to complete') {
     sh "sleep 3 && oc rollout status -n $prodProjectName dc/$targetSvc -w"
-    verifyNationalparksDB("http://$targetSvc:8080/ws/data/all/")
   }
   
   
