@@ -78,10 +78,10 @@ DOMAIN_NAME=$(shell $(BASE)/scripts/getroutingsuffix)
 # PASSWORD is the password for that user. These variables are used in the
 # "oc login" command.
 #
-#CITYGUID=XXXX-XXXX
+#GUID=XXX-XXXX
 #ON_RHPDS=1
-#MASTER_NODE_URL=https://master.$(CITYGUID).openshiftworkshop.com
-#DOMAIN_NAME=apps.$(CITYGUID).openshiftworkshop.com
+#MASTER_NODE_URL=https://master.$(GUID).openshiftworkshop.com
+#DOMAIN_NAME=apps.$(GUID).openshiftworkshop.com
 #USERNAME=user1
 #PASSWORD=openshift
 
@@ -370,6 +370,13 @@ wsinfo:
 	@curl http://$(shell oc get -n $(PROJ_PROD_NAME) route/nationalparks-bluegreen --template='{{.spec.host}}')/ws/info/
 	@echo
 
+
+loop:
+	@while true; do \
+	  curl http://$(shell oc get -n $(PROJ_PROD_NAME) route/nationalparks-bluegreen --template='{{.spec.host}}')/ws/info/; \
+	  echo; \
+	  sleep 1; \
+	done
 
 healthz:
 	@curl http://$(shell oc get -n $(PROJ_PROD_NAME) route/nationalparks-bluegreen --template='{{.spec.host}}')/ws/healthz/
