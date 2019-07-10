@@ -11,7 +11,10 @@ node('maven') {
   def nexusReleaseURL = "http://nexus3:8081/repository/releases"
   def activeSvc = ""
   def targetSvc = ""
-  def projectNamePrefix = env.PROJECT_PREFIX
+  def projectNamePrefix = ""
+  if (env.PROJECT_PREFIX) {
+    projectNamePrefix = env.PROJECT_PREFIX
+  }
   def devProjectName = "${projectNamePrefix}dev"
   def prodProjectName = "${projectNamePrefix}prod"
   def testProjectName = "${projectNamePrefix}test"
