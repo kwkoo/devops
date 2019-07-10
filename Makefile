@@ -324,7 +324,7 @@ creategogsuser:
 
 
 clonenationalparks: creategogsuser
-	@$(BASE)/scripts/clonenationalparks $(PROJ_TOOLS_NAME) $(GOGSUSER) $(GOGSPASSWORD) $(PROJ_NAME_PREFIX) $(DOMAIN_NAME)
+	@$(BASE)/scripts/clonenationalparks $(PROJ_TOOLS_NAME) $(GOGSUSER) $(GOGSPASSWORD) "$(PROJ_NAME_PREFIX)" $(DOMAIN_NAME)
 
 
 waitfornexus:
