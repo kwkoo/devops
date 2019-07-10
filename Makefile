@@ -2,7 +2,7 @@ BASE=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 # t - create tools, n - create national parks, p - create parks map, m - create MLB parks
 DEMO_SCOPE=tnmp
-PROJ_NAME_PREFIX=gck-
+PROJ_NAME_PREFIX=
 PROJ_TOOLS_NAME=tools
 PROJ_DEV_NAME=dev
 PROJ_TEST_NAME=test
@@ -228,7 +228,11 @@ deploysonarqube:
 
 deployjenkins:
 	  @echo "Deploying Jenkins..."
-	  @oc new-app jenkins-persistent -n $(PROJ_TOOLS_NAME) -p MEMORY_LIMIT=4Gi
+	  @oc new-app jenkins-persistent \
+	    -n $(PROJ_TOOLS_NAME) \
+		-p MEMORY_LIMIT=4Gi \
+		-e PROJECT_PREFIX=$(PROJ_NAME_PREFIX) \
+		-e DOMAIN_NAME=$(DOMAIN_NAME)
 else
 deploygogs:
 	@echo "Not deploying gogs"
