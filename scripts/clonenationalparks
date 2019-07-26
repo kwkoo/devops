@@ -57,8 +57,8 @@ cd nationalparks
 # by wrapping each oc patch command with a try / catch.
 #
 cp ${BASE}/../templates/Jenkinsfile .
-sed -i -e "s/def projectNamePrefix = \"\"/def projectNamePrefix = \"${PROJECT_PREFIX}\"/g" ./Jenkinsfile
-sed -i -e "s/def wildcardDNS = \".ocp.demo.com\"/def wildcardDNS = \".${DOMAIN_NAME}\"/g" ./Jenkinsfile
+sed -i -e "s/def projectNamePrefix = \".*/def projectNamePrefix = \"${PROJECT_PREFIX}\"/g" ./Jenkinsfile
+sed -i -e "s/def wildcardDNS = \".*/def wildcardDNS = \".${DOMAIN_NAME}\"/g" ./Jenkinsfile
 echo "Push bare code as mirror to gogs ..."
 git add .
 git commit -m "Updated Jenkinsfile"

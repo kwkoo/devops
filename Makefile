@@ -3,10 +3,10 @@ BASE=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 # t - create tools, n - create national parks, p - create parks map, m - create MLB parks
 DEMO_SCOPE=tnmp
 PROJ_NAME_PREFIX=
-PROJ_TOOLS_NAME=tools
-PROJ_DEV_NAME=dev
-PROJ_TEST_NAME=test
-PROJ_PROD_NAME=prod
+PROJ_TOOLS_SUFFIX=tools
+PROJ_DEV_SUFFIX=dev
+PROJ_TEST_SUFFIX=test
+PROJ_PROD_SUFFIX=prod
 NEXUS_SERVICE_NAME=nexus3
 NATIONALPARKS_APPLICATION_NAME=nationalparks
 PARKSMAP_APPLICATION_NAME=parksmap-web
@@ -98,10 +98,10 @@ REGISTRY_PASSWORD=
 # this block.                                    #
 ##################################################
 
-PROJ_TOOLS_NAME=$(PROJ_NAME_PREFIX)tools
-PROJ_DEV_NAME=$(PROJ_NAME_PREFIX)dev
-PROJ_TEST_NAME=$(PROJ_NAME_PREFIX)test
-PROJ_PROD_NAME=$(PROJ_NAME_PREFIX)prod
+PROJ_TOOLS_NAME=$(PROJ_NAME_PREFIX)$(PROJ_TOOLS_SUFFIX)
+PROJ_DEV_NAME=$(PROJ_NAME_PREFIX)$(PROJ_DEV_SUFFIX)
+PROJ_TEST_NAME=$(PROJ_NAME_PREFIX)$(PROJ_TEST_SUFFIX)
+PROJ_PROD_NAME=$(PROJ_NAME_PREFIX)$(PROJ_PROD_SUFFIX)
 
 .PHONY: deployall clean deploytemplates printvariables login clean \
 createprojects provisionroles deploygogs deploynexus deployjenkins preparedev \

@@ -25,4 +25,4 @@ echo "Creating Red Hat Repo in Nexus..."
 curl -o /tmp/nexus-functions -s https://raw.githubusercontent.com/chengkuangan/scripts/master/configure_nexus3_repo.sh
 source /tmp/nexus-functions admin admin123 http://${NEXUS_HOSTNAME}
 
-#rm -f /tmp/nexus-functions
+rm -f /tmp/nexus-functions
