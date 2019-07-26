@@ -2,7 +2,7 @@ BASE=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 # t - create tools, n - create national parks, p - create parks map, m - create MLB parks
 DEMO_SCOPE=tnmp
-PROJ_NAME_PREFIX=
+PROJ_NAME_PREFIX=kkoo-
 PROJ_TOOLS_SUFFIX=tools
 PROJ_DEV_SUFFIX=dev
 PROJ_TEST_SUFFIX=test
@@ -322,7 +322,7 @@ creategogsuser:
 
 
 clonenationalparks: creategogsuser
-	@$(BASE)/scripts/clonenationalparks $(PROJ_TOOLS_NAME) $(GOGSUSER) $(GOGSPASSWORD) "$(PROJ_NAME_PREFIX)" $(DOMAIN_NAME)
+	@$(BASE)/scripts/clonenationalparks $(PROJ_TOOLS_NAME) $(GOGSUSER) $(GOGSPASSWORD) "$(PROJ_NAME_PREFIX)" $(DOMAIN_NAME) $(PROJ_DEV_NAME) $(PROJ_PROD_NAME) $(PROJ_TEST_NAME)
 
 
 waitfornexus:
