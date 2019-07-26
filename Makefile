@@ -2,7 +2,7 @@ BASE=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 # t - create tools, n - create national parks, p - create parks map, m - create MLB parks
 DEMO_SCOPE=tnmp
-PROJ_NAME_PREFIX=kkoo-
+PROJ_NAME_PREFIX=
 PROJ_TOOLS_SUFFIX=tools
 PROJ_DEV_SUFFIX=dev
 PROJ_TEST_SUFFIX=test
