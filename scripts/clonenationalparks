@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ $# -lt 3 ]; then
-	echo "Usage: $0 GOGS_PROJECT GOGS_USER GOGS_PASSWORD"
+if [ $# -lt 5 ]; then
+	echo "Usage: $0 GOGS_PROJECT GOGS_USER GOGS_PASSWORD PROJECT_PREFIX DOMAIN_NAME"
 	exit 1
 fi
 
@@ -14,6 +14,8 @@ set -e
 PROJECTNAME=$1
 GOGSUSER=$2
 GOGSPASSWORD=$3
+PROJECT_PREFIX=$4
+DOMAIN_NAME=$5
 
 GOGS_ROUTE_NAME="$(oc get routes --no-headers  -o custom-columns=Name:metadata.name -n $PROJECTNAME | grep gogs)"
 if [ -z "${GOGS_ROUTE_NAME}" ]; then
@@ -55,7 +57,8 @@ cd nationalparks
 # by wrapping each oc patch command with a try / catch.
 #
 cp ${BASE}/../templates/Jenkinsfile .
-
+sed -i -e "s/def projectNamePrefix = \"\"/def projectNamePrefix = \"${PROJECT_PREFIX}\"/g" ./Jenkinsfile
+sed -i -e "s/def wildcardDNS = \".ocp.demo.com\"/def wildcardDNS = \".${DOMAIN_NAME}\"/g" ./Jenkinsfile
 echo "Push bare code as mirror to gogs ..."
 git add .
 git commit -m "Updated Jenkinsfile"

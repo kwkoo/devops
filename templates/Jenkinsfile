@@ -12,16 +12,13 @@ node('maven') {
   def activeSvc = ""
   def targetSvc = ""
   def projectNamePrefix = ""
-  if (env.PROJECT_PREFIX) {
-    projectNamePrefix = env.PROJECT_PREFIX
-  }
   def devProjectName = "${projectNamePrefix}dev"
   def prodProjectName = "${projectNamePrefix}prod"
   def testProjectName = "${projectNamePrefix}test"
   def devImageNameN = "${projectNamePrefix}dev"     // image namespace
   def testImageNameN = "${projectNamePrefix}dev"    // image namespace
   def prodImageNameN = "${projectNamePrefix}dev"    // image namespace
-  def wildcardDNS = ".${env.DOMAIN_NAME}"
+  def wildcardDNS = ".ocp.demo.com"
   
   
   stage('Checkout Source') {

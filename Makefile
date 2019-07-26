@@ -230,9 +230,7 @@ deployjenkins:
 	  @echo "Deploying Jenkins..."
 	  @oc new-app jenkins-persistent \
 	    -n $(PROJ_TOOLS_NAME) \
-		-p MEMORY_LIMIT=4Gi \
-		-e PROJECT_PREFIX=$(PROJ_NAME_PREFIX) \
-		-e DOMAIN_NAME=$(DOMAIN_NAME)
+		-p MEMORY_LIMIT=3Gi
 else
 deploygogs:
 	@echo "Not deploying gogs"
